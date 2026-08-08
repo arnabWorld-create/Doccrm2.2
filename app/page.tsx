@@ -127,7 +127,7 @@ function HeroSection() {
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Our medical practice brings years of medical excellence to Faith Clinic, 
+            Dr. Aishwarya Radia brings 9 years of medical excellence to Faith Clinic, 
             providing personalized healthcare with humanity and advanced treatment.
           </p>
 
@@ -144,7 +144,9 @@ function HeroSection() {
             <Card className="p-4">
               <Clock className="w-6 h-6 text-teal-600 mb-2" />
               <p className="text-sm font-semibold">Mon - Fri</p>
-              <p className="text-xs text-gray-600">09:30 AM - 12:30 PM & 05:30 PM - 07:30 PM</p>
+              <p className="text-xs text-gray-600">09:30 AM - 12:30 PM</p>
+              <p className="text-xs text-gray-600">05:30 PM - 07:30 PM</p>
+              <p className="text-xs text-gray-600 mt-1">Sat: 09:30 AM - 12:30 PM</p>
             </Card>
             <Card className="p-4">
               <MapPin className="w-6 h-6 text-teal-600 mb-2" />
@@ -166,7 +168,7 @@ function HeroSection() {
 
 function AboutSection() {
   const stats = [
-    { icon: Users, value: "4000+", label: "Happy Patients" },
+    { icon: Users, value: "7000+", label: "Happy Patients" },
     { icon: Award, value: "9 Years", label: "Experience" },
     { icon: Heart, value: "4.8", label: "Patient Rating" },
     { icon: TrendingUp, value: "95%", label: "Success Rate" },
@@ -181,13 +183,13 @@ function AboutSection() {
               About Our Practice
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Healing Beyond Medicines
+              Dr. Aishwarya Radia
             </h2>
             <div className="space-y-4 text-gray-600 text-lg">
               <p>
-                Our medical practice is dedicated to providing comprehensive healthcare with 
-                years of medical experience. Our approach combines advanced medical 
-                expertise with genuine compassion for every patient.
+                Dr. Aishwarya Radia is a dedicated General Physician with 9 years of comprehensive 
+                medical experience. Her approach combines advanced medical expertise with 
+                genuine compassion for every patient.
               </p>
               <p>
                 At Faith Clinic, we specialize in treating a wide range of conditions 
@@ -462,7 +464,9 @@ function ContactSection() {
                     <p>Monday - Friday</p>
                     <p className="font-semibold">09:30 AM - 12:30 PM</p>
                     <p className="font-semibold">05:30 PM - 07:30 PM</p>
-                    <p className="text-sm text-red-600 mt-2">Saturday & Sunday: Closed</p>
+                    <p className="mt-2">Saturday</p>
+                    <p className="font-semibold">09:30 AM - 12:30 PM</p>
+                    <p className="text-sm text-red-600 mt-2">Sunday: Closed</p>
                   </div>
                 </div>
               </div>
