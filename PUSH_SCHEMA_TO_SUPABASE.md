@@ -1,4 +1,4 @@
-# Push Database Schema to Supabase
+﻿# Push Database Schema to Supabase
 
 Your Supabase database is empty. You need to apply the schema. Here are two options:
 

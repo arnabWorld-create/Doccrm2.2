@@ -114,7 +114,7 @@ model Medication {
 
 model ClinicProfile {
   id                  String   @id @default(cuid())
-  clinicName          String   @default("DoXcia")
+  clinicName          String   @default("Faith Clinic")
   address             String?
   city                String?
   state               String?

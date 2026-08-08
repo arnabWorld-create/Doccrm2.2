@@ -1,4 +1,4 @@
-# Vercel Postgres Migration Guide
+﻿# Vercel Postgres Migration Guide
 
 ## Step 1: Get Vercel Postgres Connection Strings
 

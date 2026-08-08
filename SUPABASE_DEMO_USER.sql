@@ -1,4 +1,4 @@
--- Create demo user in Supabase
+﻿-- Create demo user in Supabase
 -- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/sxrolbjqenouqppjycmo/sql
 
 -- Email: admin@doxcia.com

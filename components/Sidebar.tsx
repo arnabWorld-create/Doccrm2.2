@@ -227,7 +227,7 @@ export function Sidebar() {
             <Stethoscope className="h-5 w-5 text-white" />
           </div>
           {(!collapsed || mobile) && (
-            <span className="text-xl font-extrabold text-brand-teal tracking-tight">DoXcia</span>
+            <span className="text-xl font-extrabold text-brand-teal tracking-tight">Faith Clinic</span>
           )}
           {!mobile && (
             <button
@@ -311,7 +311,7 @@ export function Sidebar() {
           <div className="bg-brand-red p-1 rounded-md">
             <Stethoscope className="h-4 w-4 text-white" />
           </div>
-          <span className="text-lg font-extrabold text-brand-teal">DoXcia</span>
+          <span className="text-lg font-extrabold text-brand-teal">Faith Clinic</span>
         </div>
       </div>
 

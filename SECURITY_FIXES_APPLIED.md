@@ -1,4 +1,4 @@
-# 🔒 Security Fixes Applied - DoXcia Medical CRM
+﻿# 🔒 Security Fixes Applied - Faith Clinic Medical CRM
 
 ## 🚨 Critical Security Issues Fixed
 

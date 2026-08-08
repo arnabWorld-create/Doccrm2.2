@@ -1,4 +1,4 @@
--- Quick setup script for Vercel Postgres
+﻿-- Quick setup script for Vercel Postgres
 -- Run this in Vercel Postgres Query tab after migrations
 
 -- Create a demo admin user

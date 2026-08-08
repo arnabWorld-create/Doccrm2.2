@@ -60,7 +60,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-4xl font-extrabold text-brand-teal mb-2">
-            DoXcia
+            Faith Clinic
           </h1>
           <p className="text-gray-600 text-sm font-medium">Patient Management System</p>
         </div>
@@ -152,7 +152,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-            © {new Date().getFullYear()} DoXcia. All rights reserved.
+            © {new Date().getFullYear()} Faith Clinic. All rights reserved.
           </p>
         </div>
       </div>

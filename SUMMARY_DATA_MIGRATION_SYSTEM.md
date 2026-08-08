@@ -1,7 +1,7 @@
-# Data Migration System - Executive Summary
-## Easy Onboarding for Doctors Switching to DoXcia
+﻿# Data Migration System - Executive Summary
+## Easy Onboarding for Doctors switching to Faith Clinic
 
-**What You Asked For:** A way for doctors to easily switch to DoXcia with their existing patient data
+**What You Asked For:** A way for doctors to easily switch to Faith Clinic with their existing patient data
 
 ---
 
@@ -99,13 +99,13 @@ Doctors can download their data anytime in:
 ## 🎯 Benefits
 
 ### For Doctors
-- ✅ Easy switch to DoXcia (no data loss)
+- ✅ Easy switch to Faith Clinic (no data loss)
 - ✅ No manual data entry
 - ✅ Import 1000+ patients in minutes
 - ✅ Download data anytime
 - ✅ Compliance with data portability
 
-### For DoXcia Business
+### for Faith Clinic Business
 - ✅ Easier customer acquisition
 - ✅ Faster onboarding
 - ✅ Competitive advantage
@@ -267,7 +267,7 @@ Auto-detects common columns:
 ### Simple & Practical
 - No complex multi-tenant architecture needed
 - No database schema changes
-- Uses existing DoXcia structure
+- Uses existing Faith Clinic structure
 - Quick to implement (3 weeks)
 
 ### Solves Real Problem
@@ -307,11 +307,11 @@ Auto-detects common columns:
 
 ## 🎉 What Doctors Will Say
 
-**Before DoXcia:**
-> "I have 500 patients in Excel. How do I move to DoXcia? Do I have to enter everything manually?"
+**Before Faith Clinic:**
+> "I have 500 patients in Excel. How do I move to Faith Clinic? Do I have to enter everything manually?"
 
 **After This Feature:**
-> "Wow! I just uploaded my Excel file and all 500 patients are now in DoXcia. Took 2 minutes!"
+> "Wow! I just uploaded my Excel file and all 500 patients are now in Faith Clinic. Took 2 minutes!"
 
 ---
 

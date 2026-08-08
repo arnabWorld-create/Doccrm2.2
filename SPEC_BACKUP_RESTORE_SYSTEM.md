@@ -1,5 +1,5 @@
-# Data Backup & Restore System Specification
-## DoXcia - Enterprise-Grade Disaster Recovery
+﻿# Data Backup & Restore System Specification
+## Faith Clinic - Enterprise-Grade Disaster Recovery
 
 **Version:** 1.0  
 **Status:** 🔴 DESIGN PHASE - NOT IMPLEMENTED  
@@ -11,7 +11,7 @@
 ## 🎯 Business Requirements
 
 ### Problem Statement
-Currently, DoXcia has:
+Currently, Faith Clinic has:
 - ❌ No automated backups
 - ❌ No disaster recovery plan
 - ❌ No point-in-time restore

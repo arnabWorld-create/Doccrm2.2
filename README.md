@@ -1,4 +1,4 @@
-# DoXcia - Doctor CRM & Landing Page
+﻿# Faith Clinic - Doctor CRM & Landing Page
 
 **Status**: 🟢 Private Beta (Investor-Ready MVP)  
 **Scale**: 0-100 clinics maximum  

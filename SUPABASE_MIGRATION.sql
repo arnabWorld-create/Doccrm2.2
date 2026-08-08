@@ -1,4 +1,4 @@
--- Complete Supabase Migration
+﻿-- Complete Supabase Migration
 -- Run this in Supabase SQL Editor: https://app.supabase.com -> SQL Editor
 
 -- Create users table
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS "medications" (
 -- Create clinic_profile table
 CREATE TABLE IF NOT EXISTS "clinic_profile" (
   id TEXT PRIMARY KEY,
-  "clinicName" TEXT DEFAULT 'DoXcia',
+  "clinicName" TEXT DEFAULT 'Faith Clinic',
   address TEXT,
   city TEXT,
   state TEXT,

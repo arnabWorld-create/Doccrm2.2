@@ -264,7 +264,7 @@ export default function ClinicProfilePage() {
                 onChange={handleChange}
                 required
                 className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none"
-                placeholder="DoXcia"
+                placeholder="Faith Clinic"
               />
             </div>
 
@@ -350,7 +350,7 @@ export default function ClinicProfilePage() {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none"
-                placeholder="info@doxcia.com"
+                placeholder="info@faithclinic.com"
               />
             </div>
 
@@ -359,12 +359,12 @@ export default function ClinicProfilePage() {
                 Website
               </label>
               <input
-                type="url"
+                type="text"
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
                 className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none"
-                placeholder="www.doxcia.com"
+                placeholder="www.faithclinic.com"
               />
             </div>
 

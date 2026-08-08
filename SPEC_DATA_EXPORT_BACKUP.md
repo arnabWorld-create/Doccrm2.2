@@ -1,5 +1,5 @@
-# Data Export & Backup Feature
-## DoXcia - Download Your Data Anytime
+﻿# Data Export & Backup Feature
+## Faith Clinic - Download Your Data Anytime
 
 **Version:** 1.0  
 **Status:** 🔴 DESIGN PHASE  
@@ -254,7 +254,7 @@ export async function GET(request: NextRequest) {
         return new Response(buffer, {
           headers: {
             'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition': `attachment; filename="doxcia-export-${Date.now()}.xlsx"`,
+            'Content-Disposition': `attachment; filename="faithclinic-export-${Date.now()}.xlsx"`,
           },
         });
       }
@@ -263,7 +263,7 @@ export async function GET(request: NextRequest) {
         const data = await exportService.exportToJSON(context.clinicId);
         return NextResponse.json(data, {
           headers: {
-            'Content-Disposition': `attachment; filename="doxcia-backup-${Date.now()}.json"`,
+            'Content-Disposition': `attachment; filename="faithclinic-backup-${Date.now()}.json"`,
           },
         });
       }
@@ -299,7 +299,7 @@ export default function ExportPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `doxcia-export-${Date.now()}.${format === 'excel' ? 'xlsx' : format}`;
+    a.download = `faithclinic-export-${Date.now()}.${format === 'excel' ? 'xlsx' : format}`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -404,7 +404,7 @@ export default function ExportPage() {
 **This completes the data migration system!**
 
 Doctors can:
-1. **Import** their existing data (Excel/CSV) → DoXcia
+1. **Import** their existing data (Excel/CSV) → Faith Clinic
 2. **Export** their data anytime → Excel/JSON
-3. **Switch** to DoXcia without losing data
+3. **Switch** to Faith Clinic without losing data
 4. **Backup** their data regularly

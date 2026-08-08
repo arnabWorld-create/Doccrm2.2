@@ -1,5 +1,5 @@
-# Multi-Tenant Architecture Specification
-## DoXcia - Clinic & Doctor Migration System
+﻿# Multi-Tenant Architecture Specification
+## Faith Clinic - Clinic & Doctor Migration System
 
 **Version:** 1.0  
 **Status:** 🔴 DESIGN PHASE - NOT IMPLEMENTED  
@@ -11,7 +11,7 @@
 ## 🎯 Business Requirements
 
 ### Problem Statement
-Currently, DoXcia is a **single-tenant system** where:
+Currently, Faith Clinic is a **single-tenant system** where:
 - One database = One clinic
 - No way to switch between clinics
 - No data isolation between doctors
@@ -89,7 +89,7 @@ model Clinic {
   id              String   @id @default(cuid())
   name            String
   subdomain       String   @unique  // e.g., "apollo-clinic"
-  domain          String?  @unique  // e.g., "apollo.doxcia.com"
+  domain          String?  @unique  // e.g., "apollo.faithclinic.com"
   
   // Clinic details
   address         String?
@@ -442,8 +442,8 @@ if (error) return error;
 
 ### 3. Subdomain Isolation (Optional)
 ```
-apollo-clinic.doxcia.com -> Clinic ID: apollo-clinic
-fortis-clinic.doxcia.com -> Clinic ID: fortis-clinic
+apollo-clinic.Faith Clinic.com -> Clinic ID: apollo-clinic
+fortis-clinic.faithclinic.com -> Clinic ID: fortis-clinic
 ```
 
 ---
@@ -623,7 +623,7 @@ export function getClinicPrisma(clinicId: string) {
 ---
 
 **Questions to Discuss:**
-1. Do you want subdomain-based isolation (apollo.doxcia.com)?
+1. Do you want subdomain-based isolation (apollo.faithclinic.com)?
 2. Should doctors be able to work across multiple clinics?
 3. What's the expected number of clinics in 1 year?
 4. Do you need cross-clinic analytics?

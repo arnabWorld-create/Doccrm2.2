@@ -1,4 +1,4 @@
-# Implementation Roadmap
+﻿# Implementation Roadmap
 ## Multi-Tenant Architecture + Backup/Restore System
 
 **Version:** 1.0  
@@ -511,8 +511,8 @@ Before starting, ensure:
 **Decision:** Row-level isolation (best for 10-500 clinics)
 
 ### 2. Subdomain Strategy
-- Option A: Subdomain-based (apollo.doxcia.com)
-- Option B: Path-based (doxcia.com/apollo)
+- Option A: Subdomain-based (apollo.faithclinic.com)
+- Option B: Path-based (faithclinic.com/apollo)
 - Option C: No isolation (just switcher)
 
 **Recommendation:** Option C for MVP, Option A for scale

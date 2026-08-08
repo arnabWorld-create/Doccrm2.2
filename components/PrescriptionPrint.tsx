@@ -290,7 +290,7 @@ const PrescriptionPrint = React.forwardRef<HTMLDivElement, PrescriptionPrintProp
           {/* Prescription Header */}
           <div className="prescription-header">
             <div className="header-left">
-              <div className="clinic-name">{clinicProfile?.clinicName?.toUpperCase() || 'DOXCIA'}</div>
+              <div className="clinic-name">{clinicProfile?.clinicName?.toUpperCase() || 'FAITH CLINIC'}</div>
               {clinicProfile?.tagline && (
                 <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontStyle: 'italic' }}>
                   {clinicProfile.tagline}

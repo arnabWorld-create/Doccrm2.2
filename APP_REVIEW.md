@@ -1,7 +1,7 @@
-# Application Review - Doctor CRM System
+﻿# Application Review - Doctor CRM System
 
 **Date:** January 2025  
-**Application:** DoXcia - Doctor CRM & Landing Page  
+**Application:** Faith Clinic - Doctor CRM & Landing Page  
 **Tech Stack:** Next.js 14, Prisma, PostgreSQL (Supabase), TypeScript, Tailwind CSS
 
 ---

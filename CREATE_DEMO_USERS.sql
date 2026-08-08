@@ -1,4 +1,4 @@
--- This script creates demo users in Supabase
+﻿-- This script creates demo users in Supabase
 -- Run this in Supabase SQL Editor: https://app.supabase.com -> SQL Editor
 
 -- Demo User (demo@doxcia.com / compass1234)

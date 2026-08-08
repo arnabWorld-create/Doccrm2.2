@@ -1,4 +1,4 @@
--- Add new user to DoXcia
+﻿-- Add new user to Faith Clinic
 -- Run this in Supabase SQL Editor
 
 INSERT INTO "users" (id, email, password, name, role, "isActive", "createdAt", "updatedAt")

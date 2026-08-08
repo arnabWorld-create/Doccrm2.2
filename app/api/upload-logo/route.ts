@@ -92,7 +92,7 @@ export const POST = withMiddleware(
     } else {
       await prisma.clinicProfile.create({
         data: {
-          clinicName: 'DoXcia',
+          clinicName: 'Faith Clinic',
           logo: logoPath,
         },
       });

@@ -1,4 +1,4 @@
-# 🚀 Vercel Environment Variables Setup - DoXcia Medical CRM
+﻿# 🚀 Vercel Environment Variables Setup - Faith Clinic Medical CRM
 
 ## 📋 **Complete Environment Variables for Vercel**
 
@@ -220,4 +220,4 @@ If you encounter issues:
 3. Test database connection
 4. Check Supabase project status
 
-**Your DoXcia Medical CRM will be live at:** `https://your-app-name.vercel.app` 🚀
+**Your Faith Clinic Medical CRM will be live at:** `https://your-app-name.vercel.app` 🚀

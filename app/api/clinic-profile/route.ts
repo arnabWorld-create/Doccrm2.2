@@ -14,7 +14,7 @@ const updateClinicProfileSchema = z.object({
   pincode:             z.string().max(20).optional().nullable(),
   phone:               z.string().max(20).optional().nullable(),
   email:               z.string().email().max(200).optional().nullable(),
-  website:             z.string().url().max(300).optional().nullable(),
+  website:             z.string().max(300).optional().nullable(),
   workingHours:        z.string().max(300).optional().nullable(),
   doctorName:          z.string().max(200).optional().nullable(),
   doctorQualification: z.string().max(300).optional().nullable(),
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     if (!profile) {
       profile = await prisma.clinicProfile.create({
         data: {
-          clinicName: 'DoXcia',
+          clinicName: 'Faith Clinic',
           workingHours: 'Mon-Sat: 9:00 AM - 8:00 PM | Sun: 10:00 AM - 2:00 PM',
         },
       });
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
       });
     } else {
       profile = await prisma.clinicProfile.create({
-        data: { clinicName: 'DoXcia', ...body },
+        data: { clinicName: 'Faith Clinic', ...body },
       });
     }
 

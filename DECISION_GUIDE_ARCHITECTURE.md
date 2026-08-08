@@ -1,5 +1,5 @@
-# Architecture Decision Guide
-## Choosing the Right Approach for DoXcia
+﻿# Architecture Decision Guide
+## Choosing the Right Approach for Faith Clinic
 
 **Purpose:** Help you make informed decisions about multi-tenant architecture and backup strategy  
 **Audience:** Founders, Technical Decision Makers  
@@ -18,7 +18,7 @@
 | **500-1000 clinics** | Schema-Per-Tenant | 8-10 weeks | $20-30K |
 | **1000+ clinics** | Database-Per-Tenant | 12-16 weeks | $40-60K |
 
-**For DoXcia (current stage):** Row-Level Isolation ✅
+**for Faith Clinic (current stage):** Row-Level Isolation ✅
 
 ---
 
@@ -205,7 +205,7 @@
 
 ---
 
-## 🎯 Recommended Stack for DoXcia
+## 🎯 Recommended Stack for Faith Clinic
 
 ### Architecture: Row-Level Isolation
 **Why:**
@@ -399,7 +399,7 @@ A: Yes, 1-2 hour maintenance window. Schedule during low-traffic hours (2-4 AM).
 
 ## 🎯 Final Recommendation
 
-### For DoXcia (Current Stage):
+### for Faith Clinic (Current Stage):
 
 **Architecture:** Row-Level Isolation ✅  
 **Backup:** Automated S3 Backups ✅  

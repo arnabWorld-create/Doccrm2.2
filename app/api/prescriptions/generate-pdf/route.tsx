@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     ].filter(Boolean) as { label: string; value: string }[];
 
     // Pre-build all strings — no conditional expressions inside JSX at all
-    const clinicNameStr    = (clinicProfile?.clinicName || 'DoXcia').toUpperCase();
+    const clinicNameStr    = (clinicProfile?.clinicName || 'Faith Clinic').toUpperCase();
     const doctorLine       = clinicProfile?.doctorName
       ? (clinicProfile.doctorQualification
           ? `Dr. ${clinicProfile.doctorName} — ${clinicProfile.doctorQualification}`

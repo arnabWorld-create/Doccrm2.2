@@ -1,5 +1,5 @@
--- ============================================================================
--- DoXcia CRM - Analytics Performance Indexes
+﻿-- ============================================================================
+-- Faith Clinic CRM - Analytics Performance Indexes
 -- ============================================================================
 -- 
 -- Additional indexes specifically for analytics page performance

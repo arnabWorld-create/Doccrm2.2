@@ -26,7 +26,7 @@ export default function LandingPage() {
                 <Stethoscope className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-brand-teal">DoXcia</h1>
+                <h1 className="text-xl font-bold text-brand-teal">Faith Clinic</h1>
                 <p className="text-xs text-gray-600">Medical Practice</p>
               </div>
             </div>
@@ -127,7 +127,7 @@ function HeroSection() {
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Our medical practice brings years of medical excellence to DoXcia, 
+            Our medical practice brings years of medical excellence to Faith Clinic, 
             providing personalized healthcare with humanity and advanced treatment.
           </p>
 
@@ -190,7 +190,7 @@ function AboutSection() {
                 expertise with genuine compassion for every patient.
               </p>
               <p>
-                At DoXcia, we specialize in treating a wide range of conditions 
+                At Faith Clinic, we specialize in treating a wide range of conditions 
                 including Type 2 Diabetes, Hypertension, Gastroenteritis, and infectious 
                 diseases like Malaria and Dengue.
               </p>
@@ -360,7 +360,7 @@ function GallerySection() {
 function TestimonialsSection() {
   const testimonials = [
     { name: "Rajesh Patel", condition: "Type 2 Diabetes Patient", rating: 5, text: "The doctor's knowledge and skills have helped me manage my diabetes effectively. Their caring approach and clear explanations make every visit reassuring." },
-    { name: "Priya Shah", condition: "General Health Checkup", rating: 5, text: "The prompt diagnosis and treatment I received at DoXcia led to quick recovery. The medical team is truly dedicated to their patients' wellbeing." },
+    { name: "Priya Shah", condition: "General Health Checkup", rating: 5, text: "The prompt diagnosis and treatment I received at Faith Clinic led to quick recovery. The medical team is truly dedicated to their patients' wellbeing." },
     { name: "Amit Desai", condition: "Hypertension Treatment", rating: 5, text: "I appreciate the positive and compassionate approach. The doctor takes time to understand the complete picture before recommending treatment." },
     { name: "Meera Thakkar", condition: "Travel Vaccination", rating: 5, text: "Excellent consultation for travel health. The doctor provided comprehensive advice and ensured all vaccinations were done comfortably." },
     { name: "Kiran Modi", condition: "Gastroenteritis Treatment", rating: 5, text: "Fast relief from abdominal issues! The treatment was effective and the follow-up care ensured complete recovery." },
@@ -378,7 +378,7 @@ function TestimonialsSection() {
             What Our Patients Say
           </h2>
           <p className="text-gray-600 text-lg">
-            Real experiences from real patients who've trusted DoXcia for their healthcare needs.
+            Real experiences from real patients who've trusted Faith Clinic for their healthcare needs.
           </p>
           
           <div className="flex items-center justify-center mt-8 space-x-3">
@@ -426,7 +426,7 @@ function ContactSection() {
             Get In Touch
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Visit DoXcia
+            Visit Faith Clinic
           </h2>
           <p className="text-gray-600 text-lg">
             Book your appointment today and experience compassionate healthcare.
@@ -494,7 +494,7 @@ function ContactSection() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="rounded-lg"
-                title="DoXcia Medical Practice Location"
+                title="Faith Clinic Location"
               />
             </Card>
           </div>
@@ -526,7 +526,7 @@ function FooterSection() {
                 <Stethoscope className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-brand-teal">DoXcia</h3>
+                <h3 className="text-lg font-bold text-brand-teal">Faith Clinic</h3>
                 <p className="text-sm text-gray-600">Medical Practice</p>
               </div>
             </div>
@@ -567,7 +567,7 @@ function FooterSection() {
         <div className="border-t pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-600 text-sm">
-              © {new Date().getFullYear()} DoXcia. All rights reserved.
+              © {new Date().getFullYear()} Faith Clinic. All rights reserved.
             </p>
             <Link href="/auth/login" className="text-gray-500 hover:text-teal-600 text-xs flex items-center transition-colors">
               <LogIn className="w-3 h-3 mr-1" />

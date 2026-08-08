@@ -1,4 +1,4 @@
--- Fix demo user passwords with correct bcrypt hashes
+﻿-- Fix demo user passwords with correct bcrypt hashes
 -- Run this in Supabase SQL Editor
 
 -- Update demo@doxcia.com with correct hash for 'compass1234'

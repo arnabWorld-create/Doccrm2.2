@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+﻿const bcrypt = require('bcryptjs');
 
 bcrypt.hash('admin123', 8).then(hash => {
   console.log('\nRun this SQL in Supabase:');

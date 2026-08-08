@@ -66,7 +66,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <h1 className="text-3xl font-extrabold text-brand-teal">
-                DoXcia
+                Faith Clinic
               </h1>
               <p className="text-brand-teal text-sm">Patient Management</p>
             </div>
@@ -76,7 +76,7 @@ export default function RegisterPage() {
         {/* Register Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-bold text-brand-teal mb-2">Create Account</h2>
-          <p className="text-gray-600 mb-6">Join DoXcia today</p>
+          <p className="text-gray-600 mb-6">Join Faith Clinic today</p>
 
           {/* Error Message */}
           {error && (

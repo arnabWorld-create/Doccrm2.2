@@ -1,4 +1,4 @@
-# 🚀 Vercel Environment Variables - Quick Reference
+﻿# 🚀 Vercel Environment Variables - Quick Reference
 
 ## 📋 **Copy These to Vercel Dashboard**
 
@@ -58,4 +58,4 @@
 - ✅ JWT_SECRET is required (no fallbacks)
 - ✅ Database credentials are environment-based
 
-**Your DoXcia Medical CRM is production-ready! 🏥**
+**Your Faith Clinic Medical CRM is production-ready! 🏥**

@@ -30,7 +30,7 @@ export default function ExportPage() {
       // Get filename from Content-Disposition header
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : `doxcia-export.${format === 'excel' ? 'xlsx' : format}`;
+      const filename = filenameMatch ? filenameMatch[1] : `faithclinic-export.${format === 'excel' ? 'xlsx' : format}`;
       
       // Download file
       const blob = await response.blob();

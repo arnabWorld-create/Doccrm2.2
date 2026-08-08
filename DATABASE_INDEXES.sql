@@ -1,9 +1,9 @@
--- ============================================================================
--- DoXcia CRM - Database Performance Indexes
+﻿-- ============================================================================
+-- Faith Clinic CRM - Database Performance Indexes
 -- ============================================================================
 -- 
 -- This SQL file contains all the indexes needed to optimize database queries
--- for the DoXcia CRM application.
+-- for the Faith Clinic CRM application.
 --
 -- INSTRUCTIONS:
 -- 1. Go to Supabase Dashboard (https://app.supabase.com)

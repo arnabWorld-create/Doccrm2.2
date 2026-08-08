@@ -1,5 +1,5 @@
-# Data Import & Migration System Specification
-## DoXcia - Easy Onboarding with Existing Data
+﻿# Data Import & Migration System Specification
+## Faith Clinic - Easy Onboarding with Existing Data
 
 **Version:** 1.0  
 **Status:** 🔴 DESIGN PHASE - NOT IMPLEMENTED  
@@ -11,16 +11,16 @@
 ## 🎯 Business Requirements
 
 ### Problem Statement
-Doctors switching to DoXcia have:
+Doctors switching to Faith Clinic have:
 - ❌ Patient data in Excel/CSV files
 - ❌ Data in other clinic management software
 - ❌ Paper records they want to digitize
-- ❌ No easy way to import into DoXcia
+- ❌ No easy way to import into Faith Clinic
 - ❌ Fear of losing historical data
 
 ### Solution Goals
 1. **Easy Import**: Upload Excel/CSV files with patient data
-2. **Smart Mapping**: Automatically map columns to DoXcia fields
+2. **Smart Mapping**: Automatically map columns to Faith Clinic fields
 3. **Validation**: Check data quality before import
 4. **Preview**: See what will be imported
 5. **Bulk Import**: Import hundreds of patients at once
@@ -132,7 +132,7 @@ Priya Shah,32,Female,9876543211,A+,Surat
 
 ### Standard Fields (Auto-Detected)
 
-| DoXcia Field | Common Column Names | Required |
+| Faith Clinic field | Common Column Names | Required |
 |--------------|---------------------|----------|
 | Name | Name, Patient Name, Full Name | ✅ Yes |
 | Age | Age, Patient Age | ❌ No |
@@ -145,7 +145,7 @@ Priya Shah,32,Female,9876543211,A+,Surat
 
 ### Visit Data (Optional)
 
-| DoXcia Field | Common Column Names |
+| Faith Clinic field | Common Column Names |
 |--------------|---------------------|
 | Visit Date | Date, Visit Date, Consultation Date |
 | Chief Complaint | Complaint, Reason, Problem |
@@ -638,7 +638,7 @@ export default function ImportPage() {
         <div className="bg-white p-8 rounded-xl shadow-lg">
           <h2 className="text-xl font-semibold mb-4">Map Columns</h2>
           <p className="text-gray-600 mb-6">
-            Match your file columns to DoXcia fields
+            Match your file columns to Faith Clinic fields
           </p>
           
           <div className="space-y-4">
@@ -826,4 +826,4 @@ export default function ImportPage() {
 
 ---
 
-**This is what you need, right?** Easy data import for doctors switching to DoXcia!
+**This is what you need, right?** Easy data import for doctors switching to Faith Clinic!

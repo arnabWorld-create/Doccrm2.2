@@ -8,8 +8,8 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DoXcia - Patient Management",
-  description: "Patient Management System for DoXcia",
+  title: "Faith Clinic - Patient Management",
+  description: "Patient Management System for Faith Clinic",
 };
 
 export const viewport = {

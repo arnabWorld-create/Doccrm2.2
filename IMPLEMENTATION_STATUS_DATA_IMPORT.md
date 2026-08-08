@@ -1,4 +1,4 @@
-# Data Import System - Implementation Status
+﻿# Data Import System - Implementation Status
 
 **Date:** February 14, 2026  
 **Status:** ✅ Phase 1 Complete - Ready for Testing
@@ -51,7 +51,7 @@ Save as `test-patients.xlsx`
 
 ### Step 2: Test Import Flow
 
-1. **Login to DoXcia**
+1. **Login to Faith Clinic**
 2. **Click on your profile** (top right)
 3. **Click "Import Data"**
 4. **Upload the Excel file**

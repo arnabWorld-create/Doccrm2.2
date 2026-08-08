@@ -60,7 +60,7 @@ export default function WhatsAppShareButton({
 
   const buildMessage = (pdfUrl: string | null) => {
     const lines: string[] = [];
-    const clinic = clinicProfile?.clinicName || 'DoXcia';
+    const clinic = clinicProfile?.clinicName || 'Faith Clinic';
     if (clinicProfile?.doctorName) lines.push(`👨‍⚕️ Dr. ${clinicProfile.doctorName}`);
     lines.push(`🏥 *${clinic}* — Visit Summary`);
     lines.push('');
@@ -102,7 +102,7 @@ export default function WhatsAppShareButton({
       lines.push(pdfUrl);
     }
     if (clinicProfile?.phone) lines.push(`\n📞 Clinic: ${clinicProfile.phone}`);
-    lines.push('\n_Sent via DoXcia_');
+    lines.push('\n_Sent via Faith Clinic_');
     return encodeURIComponent(lines.join('\n'));
   };
 

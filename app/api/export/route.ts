@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         return new Response(buffer as any, {
           headers: {
             'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition': `attachment; filename="doxcia-export-${timestamp}.xlsx"`,
+            'Content-Disposition': `attachment; filename="faithclinic-export-${timestamp}.xlsx"`,
             'Content-Length': buffer.length.toString(),
           },
         });
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         return new Response(jsonString, {
           headers: {
             'Content-Type': 'application/json',
-            'Content-Disposition': `attachment; filename="doxcia-backup-${timestamp}.json"`,
+            'Content-Disposition': `attachment; filename="faithclinic-backup-${timestamp}.json"`,
           },
         });
       }
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
         return new Response(patientsCSV, {
           headers: {
             'Content-Type': 'text/csv',
-            'Content-Disposition': `attachment; filename="doxcia-patients-${timestamp}.csv"`,
+            'Content-Disposition': `attachment; filename="faithclinic-patients-${timestamp}.csv"`,
           },
         });
       }

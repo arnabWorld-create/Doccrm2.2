@@ -1,7 +1,7 @@
-# Executive Summary
+﻿# Executive Summary
 ## Multi-Tenant Migration + Backup System Proposal
 
-**Prepared For:** DoXcia Founder  
+**Prepared For:** Faith Clinic Founder  
 **Date:** February 14, 2026  
 **Status:** Proposal for Discussion  
 **Confidence:** High (95%)
@@ -362,7 +362,7 @@ Read the 4 detailed specifications I created
 3. **Team:** Do you have developers or need to hire?
 4. **Maintenance:** When can we schedule 1-2 hour maintenance window?
 5. **Features:** Any additional requirements?
-6. **Subdomain:** Do you want subdomain isolation (apollo.doxcia.com)?
+6. **Subdomain:** Do you want subdomain isolation (apollo.faithclinic.com)?
 7. **Backup:** Daily backups sufficient or need hourly?
 
 ---
