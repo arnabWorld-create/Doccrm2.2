@@ -354,8 +354,16 @@ export async function POST(request: NextRequest) {
         throw new Error(`Supabase upload: ${error.message}`);
       }
 
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
-      return Response.json({ url: data.publicUrl });
+      // Build the proxy URL.
+      // Prefer NEXT_PUBLIC_APP_URL (set to your production domain) so the link
+      // in WhatsApp is always publicly accessible. Falls back to the request
+      // host for environments where the env var isn't set.
+      const configuredUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
+      const host   = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+      const proto  = request.headers.get('x-forwarded-proto') || 'https';
+      const origin = configuredUrl || `${proto}://${host}`;
+      const proxyUrl = `${origin}/api/prescriptions/view/${filename}`;
+      return Response.json({ url: proxyUrl });
     }
 
     // Dev fallback: return PDF inline as base64

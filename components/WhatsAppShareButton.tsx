@@ -120,6 +120,10 @@ export default function WhatsAppShareButton({
       });
       const json = await res.json();
 
+      if (!res.ok || json.error) {
+        console.error('PDF generation error:', json.error || res.status);
+      }
+
       setStatus('opening');
       const msg = buildMessage(json.url ?? null);
       window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
@@ -127,6 +131,7 @@ export default function WhatsAppShareButton({
     } catch (err) {
       console.error('WhatsApp share failed:', err);
       // Fallback: text-only
+      setStatus('opening');
       const msg = buildMessage(null);
       window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     } finally {

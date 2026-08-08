@@ -65,9 +65,16 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Upload failed. Please try again.' }, { status: 500 });
     }
 
-    const { data } = supabase.storage.from(bucket).getPublicUrl(storagePath);
+    // Build the proxy URL.
+    // Prefer NEXT_PUBLIC_APP_URL (set to your production domain) so the link
+    // in WhatsApp is always publicly accessible.
+    const configuredUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
+    const host     = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+    const proto    = request.headers.get('x-forwarded-proto') || 'https';
+    const origin   = configuredUrl || `${proto}://${host}`;
+    const proxyUrl = `${origin}/api/prescriptions/view/${storagePath}`;
 
-    return Response.json({ url: data.publicUrl });
+    return Response.json({ url: proxyUrl });
   } catch (err) {
     logger.error('PDF upload failed', err);
     return Response.json({ error: 'Upload failed. Please try again.' }, { status: 500 });
