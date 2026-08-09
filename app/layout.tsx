@@ -10,6 +10,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Faith Clinic - Patient Management",
   description: "Patient Management System for Faith Clinic",
+  icons: {
+    icon: [
+      { url: '/favicon.ico',  sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.svg',  type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
 };
 
 export const viewport = {
