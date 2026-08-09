@@ -8,8 +8,12 @@ import {
   Star, Calendar, Clock, MapPin, Phone, Mail, LogIn, Menu,
   Award, Heart, Users, TrendingUp, Activity, Droplet, Eye, 
   Shield, Stethoscope, Syringe, Pill, Quote, MessageCircle,
-  Instagram, Video, X
+  Instagram, Video, X, ExternalLink
 } from 'lucide-react';
+
+const WHATSAPP_NUMBER = '919429907575';
+const WHATSAPP_BOOKING_MSG = encodeURIComponent("Hi, I'd like to book an appointment at Faith Clinic.");
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_BOOKING_MSG}`;
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -22,7 +26,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-3">
-              <div className="bg-brand-red p-2 rounded-xl">
+              <div className="bg-brand-teal p-2 rounded-xl">
                 <Stethoscope className="h-8 w-8 text-white" />
               </div>
               <div>
@@ -39,12 +43,20 @@ export default function LandingPage() {
               <a href="#contact" className="hover:text-teal-600 transition-colors">Contact</a>
             </nav>
 
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-3">
               <a href="tel:+919429907575" className="flex items-center text-sm text-gray-600 hover:text-teal-600 transition-colors">
                 <Phone className="w-4 h-4 mr-2" />
-                Call Us
+                +91 94299 07575
               </a>
-
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Book Appointment
+              </a>
             </div>
 
             <button 
@@ -63,6 +75,15 @@ export default function LandingPage() {
                 <a href="#services" className="hover:text-teal-600 transition-colors">Services</a>
                 <a href="#testimonials" className="hover:text-teal-600 transition-colors">Testimonials</a>
                 <a href="#contact" className="hover:text-teal-600 transition-colors">Contact</a>
+                <a
+                  href={WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-green-500 text-white font-semibold px-4 py-2 rounded-full w-fit transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Book Appointment
+                </a>
               </nav>
             </div>
           )}
@@ -85,12 +106,26 @@ export default function LandingPage() {
         {/* Testimonials Section */}
         <TestimonialsSection />
         
+        {/* Instagram / Health Tips Section */}
+        <InstagramSection />
+        
         {/* Contact Section */}
         <ContactSection />
       </main>
 
       {/* Footer */}
       <FooterSection />
+
+      {/* Floating WhatsApp button — mobile */}
+      <a
+        href={WHATSAPP_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 md:hidden flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-full shadow-xl transition-colors"
+      >
+        <MessageCircle className="w-5 h-5" />
+        Book Appointment
+      </a>
     </div>
   );
 }
@@ -132,10 +167,16 @@ function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <a href="tel:+919879788889">
+            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
+              <Button size="lg" className="text-lg bg-green-500 hover:bg-green-600 text-white border-0">
+                <MessageCircle className="mr-2" />
+                Book Appointment on WhatsApp
+              </Button>
+            </a>
+            <a href="tel:+919429907575">
               <Button variant="outline" size="lg" className="text-lg">
                 <Phone className="mr-2" />
-                Contact Us
+                Call Us
               </Button>
             </a>
           </div>
@@ -419,6 +460,60 @@ function TestimonialsSection() {
   );
 }
 
+function InstagramSection() {
+  const tips = [
+    { emoji: "🩺", title: "Managing Diabetes Daily", desc: "Simple habits to keep your blood sugar in check throughout the day." },
+    { emoji: "❤️", title: "Blood Pressure & You", desc: "What your BP numbers really mean and when to see a doctor." },
+    { emoji: "💧", title: "Hydration & Health", desc: "How much water you actually need — and signs you're not drinking enough." },
+    { emoji: "🦟", title: "Dengue: Early Signs", desc: "Spot dengue fever early and know exactly when to seek treatment." },
+    { emoji: "🥗", title: "Eating for Energy", desc: "Foods that fight fatigue and keep you active all day." },
+    { emoji: "😴", title: "Sleep & Immunity", desc: "Why good sleep is your most powerful medicine." },
+  ];
+
+  return (
+    <section className="py-20 bg-gradient-to-b from-white to-pink-50/30">
+      <div className="container mx-auto px-4">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            <Instagram className="w-4 h-4" />
+            Follow on Instagram
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Health Tips from Dr. Radia
+          </h2>
+          <p className="text-gray-600 text-lg">
+            Dr. Aishwarya shares practical health advice and wellness tips regularly on Instagram. Follow to stay informed.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {tips.map((tip, index) => (
+            <Card key={index} className="p-6 hover:shadow-lg transition-all hover:-translate-y-1 border border-pink-100/60 bg-white">
+              <div className="text-4xl mb-4">{tip.emoji}</div>
+              <h3 className="text-lg font-semibold mb-2">{tip.title}</h3>
+              <p className="text-gray-600 text-sm">{tip.desc}</p>
+            </Card>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-opacity text-lg shadow-lg"
+          >
+            <Instagram className="w-5 h-5" />
+            Follow @faithclinic for Health Tips
+            <ExternalLink className="w-4 h-4" />
+          </a>
+          <p className="text-gray-500 text-sm mt-3">New health tips posted regularly</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ContactSection() {
   return (
     <section id="contact" className="py-20 bg-gray-50">
@@ -490,15 +585,15 @@ function ContactSection() {
           <div className="h-full min-h-[500px]">
             <Card className="h-full p-0 overflow-hidden">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.7234567890123!2d72.51119614917364!3d23.010222858921864!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e9b9ce31b4c1f%3A0xbd0c41168a1c5b6e!2sDoXcia%20Medical%20Practice!5e1!3m2!1sen!2sin!4v1763463449371!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3672.375695329835!2d72.5112832!3d23.0099739!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e9b9ce31b4c1f%3A0xbd0c41168a1c5b6e!2sFaith%20Clinic%20-%20Dr.%20Aishwarya%20Radia!5e0!3m2!1sen!2sin!4v1786290251823!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="strict-origin-when-cross-origin"
                 className="rounded-lg"
-                title="Faith Clinic Location"
+                title="Faith Clinic - Dr. Aishwarya Radia"
               />
             </Card>
           </div>
@@ -508,10 +603,20 @@ function ContactSection() {
           <h3 className="text-3xl font-bold text-white mb-4">
             Ready to Experience Better Healthcare?
           </h3>
-          <p className="text-white/90 mb-6 text-lg">
-            Book your appointment with our medical team today
+          <p className="text-white/90 mb-8 text-lg">
+            Book your appointment with Dr. Aishwarya Radia today
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white text-green-600 font-semibold px-8 py-4 rounded-full hover:bg-green-50 transition-colors text-lg shadow-lg">
+              <MessageCircle className="w-5 h-5" />
+              Book via WhatsApp
+            </a>
+            <a href="tel:+919429907575"
+              className="inline-flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-8 py-4 rounded-full transition-colors text-lg border border-white/40">
+              <Phone className="w-5 h-5" />
+              Call +91 94299 07575
+            </a>
           </div>
         </div>
       </div>
@@ -526,7 +631,7 @@ function FooterSection() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-brand-red p-2 rounded-xl">
+              <div className="bg-brand-teal p-2 rounded-xl">
                 <Stethoscope className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -539,8 +644,11 @@ function FooterSection() {
               Your health and wellbeing are our priority.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="bg-teal-100 hover:bg-teal-600 hover:text-white text-teal-600 p-2 rounded-lg transition-all">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-80 text-white p-2 rounded-lg transition-all">
                 <Instagram className="w-5 h-5" />
+              </a>
+              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all">
+                <MessageCircle className="w-5 h-5" />
               </a>
             </div>
           </div>
