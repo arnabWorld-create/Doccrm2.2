@@ -8,6 +8,7 @@ import MedicineInputStructured from './MedicineInputStructured';
 import ConditionInput from './ConditionInput';
 import BPInput from './BPInput';
 import { VisitFeeForm } from './VisitFeeForm';
+import { Toast, type ToastState } from './ui/Toast';
 
 interface VisitFormProps {
   patientId: string;
@@ -98,6 +99,7 @@ const VisitForm: React.FC<VisitFormProps> = ({ patientId, initialData, onSubmit:
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   // Prepare default values
   const getDefaultValues = () => {
@@ -203,14 +205,22 @@ const VisitForm: React.FC<VisitFormProps> = ({ patientId, initialData, onSubmit:
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Something went wrong');
+        const msg = errorData.message || 'Something went wrong. Please try again.';
+        setError(msg);
+        setToast({ message: msg, type: 'error' });
+        return;
       }
       
-      router.push(`/patients/${patientId}`);
-      router.refresh();
+      setToast({ message: 'Visit saved successfully!', type: 'success' });
+      setTimeout(() => {
+        router.push(`/patients/${patientId}`);
+        router.refresh();
+      }, 1000);
     } catch (err) {
       console.error('Submit error:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      const msg = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(msg);
+      setToast({ message: msg, type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -218,6 +228,7 @@ const VisitForm: React.FC<VisitFormProps> = ({ patientId, initialData, onSubmit:
 
   return (
     <FormProvider {...methods}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Visit Info */}
         <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border-2 border-gray-100">

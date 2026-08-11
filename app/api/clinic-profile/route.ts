@@ -13,7 +13,7 @@ const updateClinicProfileSchema = z.object({
   state:               z.string().max(100).optional().nullable(),
   pincode:             z.string().max(20).optional().nullable(),
   phone:               z.string().max(20).optional().nullable(),
-  email:               z.string().email().max(200).optional().nullable(),
+  email:               z.union([z.string().email().max(200), z.literal('')]).optional().nullable(),
   website:             z.string().max(300).optional().nullable(),
   workingHours:        z.string().max(300).optional().nullable(),
   doctorName:          z.string().max(200).optional().nullable(),

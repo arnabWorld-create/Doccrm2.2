@@ -1,4 +1,4 @@
-﻿-- CreateTable
+-- CreateTable
 CREATE TABLE "clinic_profile" (
     "id" TEXT NOT NULL,
     "clinicName" TEXT NOT NULL DEFAULT 'Faith Clinic',

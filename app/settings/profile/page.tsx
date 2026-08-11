@@ -2,17 +2,45 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, User, Phone, Mail, Clock, Upload, Save, Image as ImageIcon, Settings } from 'lucide-react';
+import { Building2, User, Phone, Mail, Clock, Upload, Save, Image as ImageIcon, Settings, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { PageHero } from '@/components/ui/page-hero';
+
+// Toast notification component
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-medium transition-all animate-in slide-in-from-bottom-4 ${
+      type === 'success'
+        ? 'bg-green-50 border-green-200 text-green-800'
+        : 'bg-red-50 border-red-200 text-red-800'
+    }`}>
+      {type === 'success'
+        ? <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+        : <XCircle className="h-5 w-5 text-red-600 shrink-0" />
+      }
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-2 opacity-60 hover:opacity-100 text-lg leading-none">&times;</button>
+    </div>
+  );
+}
 
 export default function ClinicProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+  };
 
   const [formData, setFormData] = useState({
     clinicName: '',
@@ -81,7 +109,7 @@ export default function ClinicProfilePage() {
           legacySettings.receiptHeader,
           legacySettings.receiptFooter,
         ].some(Boolean)) {
-          setMessage('Legacy invoice and receipt settings were loaded. Save this profile to store them for all users.');
+          showToast('Legacy invoice settings loaded. Save to apply for all users.', 'success');
         }
         if (data.logo) {
           setLogoPreview(data.logo);
@@ -107,17 +135,16 @@ export default function ClinicProfilePage() {
 
     // Validate file
     if (!file.type.startsWith('image/')) {
-      setMessage('Please upload an image file');
+      showToast('Please upload an image file (PNG, JPG, or SVG)', 'error');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setMessage('File size must be less than 2MB');
+      showToast('File size must be less than 2MB', 'error');
       return;
     }
 
     setUploading(true);
-    setMessage('');
 
     try {
       const formData = new FormData();
@@ -130,14 +157,13 @@ export default function ClinicProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setLogoPreview(data.logoPath + '?t=' + Date.now()); // Cache bust
-        setMessage('Logo uploaded successfully!');
-        setTimeout(() => setMessage(''), 3000);
+        setLogoPreview(data.logoPath + '?t=' + Date.now());
+        showToast('Logo uploaded successfully!', 'success');
       } else {
-        setMessage('Failed to upload logo');
+        showToast('Failed to upload logo. Please try again.', 'error');
       }
     } catch (error) {
-      setMessage('Failed to upload logo');
+      showToast('Failed to upload logo. Please try again.', 'error');
     } finally {
       setUploading(false);
     }
@@ -146,7 +172,7 @@ export default function ClinicProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage('');
+    setFieldErrors({});
 
     try {
       const response = await fetch('/api/clinic-profile', {
@@ -156,15 +182,23 @@ export default function ClinicProfilePage() {
       });
 
       if (response.ok) {
-        setMessage('Profile updated successfully!');
-        setTimeout(() => {
-          router.push('/');
-        }, 1500);
+        showToast('Profile saved successfully!', 'success');
       } else {
-        setMessage('Failed to update profile');
+        const data = await response.json();
+        if (response.status === 422 && data.errors) {
+          // Show field-level validation errors
+          setFieldErrors(
+            Object.fromEntries(
+              Object.entries(data.errors as Record<string, string[]>).map(([k, v]) => [k, v[0]])
+            )
+          );
+          showToast('Please fix the errors below and try again.', 'error');
+        } else {
+          showToast(data.message || 'Failed to save profile. Please try again.', 'error');
+        }
       }
     } catch (error) {
-      setMessage('Failed to update profile');
+      showToast('Network error. Please check your connection and try again.', 'error');
     } finally {
       setSaving(false);
     }
@@ -187,10 +221,12 @@ export default function ClinicProfilePage() {
         subtitle="Manage your clinic information and doctor details for prescriptions"
       />
 
-      {message && (
-        <div className={`p-4 rounded-lg ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-          {message}
-        </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -349,9 +385,10 @@ export default function ClinicProfilePage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none"
+                className={`w-full rounded-lg border-2 px-4 py-2.5 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
                 placeholder="info@faithclinic.com"
               />
+              {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
             </div>
 
             <div>
@@ -537,8 +574,10 @@ function ChangePasswordSection() {
     newPassword: '',
     confirmPassword: '',
   });
-  const [passwordMessage, setPasswordMessage] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [changingPassword, setChangingPassword] = useState(false);
+
+  const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData({
@@ -549,16 +588,15 @@ function ChangePasswordSection() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordMessage('');
 
     // Validation
     if (passwordData.newPassword.length < 6) {
-      setPasswordMessage('New password must be at least 6 characters');
+      showToast('New password must be at least 6 characters', 'error');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordMessage('New passwords do not match');
+      showToast('New passwords do not match', 'error');
       return;
     }
 
@@ -577,17 +615,13 @@ function ChangePasswordSection() {
       const data = await response.json();
 
       if (response.ok) {
-        setPasswordMessage('Password changed successfully!');
-        setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        });
+        showToast('Password changed successfully!', 'success');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
-        setPasswordMessage(data.error || 'Failed to change password');
+        showToast(data.error || 'Failed to change password. Check your current password.', 'error');
       }
     } catch (error) {
-      setPasswordMessage('Failed to change password');
+      showToast('Network error. Please try again.', 'error');
     } finally {
       setChangingPassword(false);
     }
@@ -595,18 +629,13 @@ function ChangePasswordSection() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <h3 className="text-xl font-bold text-brand-teal mb-4 flex items-center">
         <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
         Change Password
       </h3>
-
-      {passwordMessage && (
-        <div className={`p-4 rounded-lg mb-4 ${passwordMessage.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-          {passwordMessage}
-        </div>
-      )}
 
       <form onSubmit={handlePasswordSubmit} className="space-y-4">
         <div>

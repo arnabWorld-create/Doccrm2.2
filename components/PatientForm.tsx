@@ -11,7 +11,7 @@ import MedicineInputStructured from './MedicineInputStructured';
 import ConditionInput from './ConditionInput';
 import BPInput from './BPInput';
 import { VisitFeeForm } from './VisitFeeForm';
-// FIX: Switched to a named type import to resolve module resolution issues.
+import { Toast, type ToastState } from './ui/Toast';
 import type { Patient } from '@prisma/client';
 
 interface PatientFormProps {
@@ -66,6 +66,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ defaultValues, appointmentId 
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   // Parse reports from JSON string if it exists
   const parseReports = (reports: any) => {
@@ -148,7 +149,10 @@ const PatientForm: React.FC<PatientFormProps> = ({ defaultValues, appointmentId 
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Server error:', errorData);
-        throw new Error(errorData.message || 'Something went wrong');
+        const msg = errorData.message || 'Something went wrong. Please try again.';
+        setError(msg);
+        setToast({ message: msg, type: 'error' });
+        return;
       }
       
       const responseData = await response.json();
@@ -177,7 +181,9 @@ const PatientForm: React.FC<PatientFormProps> = ({ defaultValues, appointmentId 
       router.push('/patients');
     } catch (err) {
       console.error('Submit error:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      const msg = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(msg);
+      setToast({ message: msg, type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -185,6 +191,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ defaultValues, appointmentId 
 
   return (
     <FormProvider {...methods}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Error Display */}
         {error && (
