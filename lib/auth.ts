@@ -41,23 +41,23 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return isValid;
 }
 
-export function generateToken(userId: string, email: string): string {
+export function generateToken(userId: string, email: string, name: string, role: string): string {
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not configured');
   }
   return jwt.sign(
-    { userId, email },
+    { userId, email, name, role },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRY }
   );
 }
 
-export function verifyToken(token: string): { userId: string; email: string } | null {
+export function verifyToken(token: string): { userId: string; email: string; name?: string; role?: string } | null {
   try {
     if (!JWT_SECRET) {
       throw new Error('JWT_SECRET is not configured');
     }
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; name?: string; role?: string };
     return decoded;
   } catch (error) {
     return null;

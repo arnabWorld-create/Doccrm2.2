@@ -43,8 +43,8 @@ export const POST = withMiddleware(
         throw ApiErrors.unauthorized('Invalid email or password');
       }
 
-      // Generate token
-      const token = generateToken(user.id, user.email);
+      // Generate token — include name + role so /api/auth/me needs no DB call
+      const token = generateToken(user.id, user.email, user.name, user.role);
 
       // Update last login in background (don't await)
       prisma.user.update({
