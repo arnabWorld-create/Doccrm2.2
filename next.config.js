@@ -15,6 +15,7 @@ const cspHeader = [
   `font-src 'self'`,
   `object-src 'none'`,
   `base-uri 'self'`,
+  `frame-src https://www.google.com`,
   `frame-ancestors 'none'`,
   `form-action 'self'`,
 ].join('; ');

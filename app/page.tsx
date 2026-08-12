@@ -14,6 +14,8 @@ import {
 const WHATSAPP_NUMBER = '919429907575';
 const WHATSAPP_BOOKING_MSG = encodeURIComponent("Hi, I'd like to book an appointment at Faith Clinic.");
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_BOOKING_MSG}`;
+const INSTAGRAM_LINK = 'https://www.instagram.com/dr.aishwarya.faithclinic.abad?utm_source=qr';
+const YOUTUBE_LINK = 'https://www.youtube.com/@draishwaryafaithclinic/shorts';
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -498,7 +500,7 @@ function InstagramSection() {
 
         <div className="text-center">
           <a
-            href="#"
+            href={INSTAGRAM_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-opacity text-lg shadow-lg"
@@ -644,8 +646,11 @@ function FooterSection() {
               Your health and wellbeing are our priority.
             </p>
             <div className="flex space-x-4">
-              <a href="#" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-80 text-white p-2 rounded-lg transition-all">
+              <a href={INSTAGRAM_LINK} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-80 text-white p-2 rounded-lg transition-all">
                 <Instagram className="w-5 h-5" />
+              </a>
+              <a href={YOUTUBE_LINK} target="_blank" rel="noopener noreferrer" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all">
+                <Video className="w-5 h-5" />
               </a>
               <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all">
                 <MessageCircle className="w-5 h-5" />
