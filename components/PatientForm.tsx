@@ -288,8 +288,10 @@ const PatientForm: React.FC<PatientFormProps> = ({ defaultValues, appointmentId 
               <h3 className="text-lg sm:text-xl font-bold text-brand-teal">Medical Details</h3>
             </div>
             <div className="space-y-4 sm:space-y-6">
+                <Textarea name="chiefComplaint" label="Chief Complaint" register={register} error={errors.chiefComplaint} placeholder="Main reason for visit..."/>
                 <ConditionInput name="signs" label="Signs & Symptoms" error={errors.signs} placeholder="e.g., Fever, Cough, Headache (type to see suggestions)..." />
                 <Textarea name="investigations" label="Investigations" register={register} error={errors.investigations} placeholder="e.g., CBC, X-Ray Chest..."/>
+                <Textarea name="diagnosis" label="Diagnosis" register={register} error={errors.diagnosis} placeholder="e.g., Viral Fever, Hypertension..."/>
                 <Textarea name="treatment" label="Treatment" register={register} error={errors.treatment} placeholder="e.g., Oxygen therapy, bed rest..."/>
                 <MedicineInputStructured name="medications" label="Medicines" error={errors.medications} />
                 <Textarea name="history" label="Medical History / Summary" register={register} error={errors.history} placeholder="e.g., History of hypertension..."/>
