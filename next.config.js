@@ -10,12 +10,14 @@ const cspHeader = [
   `default-src 'self'`,
   `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: ${supabaseUrl}`,
+  // Allow Supabase images + WhatsApp/Instagram/Google link-preview crawlers
+  `img-src 'self' data: blob: ${supabaseUrl} https://web.whatsapp.com https://static.whatsapp.net https://*.cdninstagram.com https://lookaside.fbsbx.com`,
   `connect-src 'self' ${supabaseUrl} https://*.upstash.io ${appUrl}`.trim(),
-  `font-src 'self'`,
+  `font-src 'self' https://fonts.gstatic.com`,
   `object-src 'none'`,
   `base-uri 'self'`,
-  `frame-src https://www.google.com`,
+  // Allow Google Maps embed + YouTube embed
+  `frame-src https://www.google.com https://www.youtube.com`,
   `frame-ancestors 'none'`,
   `form-action 'self'`,
 ].join('; ');
