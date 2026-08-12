@@ -45,11 +45,13 @@ export async function GET(req: NextRequest) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       end.setDate(end.getDate() + 1);
-      
-      where.appointmentDate = {
-        gte: start,
-        lt: end,
-      };
+      where.appointmentDate = { gte: start, lt: end };
+    } else if (startDate) {
+      where.appointmentDate = { gte: new Date(startDate) };
+    } else if (endDate) {
+      const end = new Date(endDate);
+      end.setDate(end.getDate() + 1);
+      where.appointmentDate = { lt: end };
     }
 
     // Filter by status

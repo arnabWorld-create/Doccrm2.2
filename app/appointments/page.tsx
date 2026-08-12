@@ -42,13 +42,9 @@ export default function AppointmentsPage() {
       const response = await fetch(url);
       const data = await response.json();
       
-      // Ensure data is an array
-      if (Array.isArray(data)) {
-        setAppointments(data);
-      } else {
-        console.error('API returned non-array data:', data);
-        setAppointments([]);
-      }
+      // API returns { data: [], pagination: {} } — unwrap accordingly
+      const list = Array.isArray(data) ? data : (data.data ?? []);
+      setAppointments(list);
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
       setAppointments([]);
