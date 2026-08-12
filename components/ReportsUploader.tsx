@@ -4,8 +4,7 @@ import { useState, ChangeEvent } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { UploadCloud, FileText, Trash2, Loader2 } from 'lucide-react'
 import { reportFileSchema } from '@/lib/validations'
-import { supabase } from '@/lib/supabase'
-import { validateFile, FILE_UPLOAD_CONFIGS, generateSafeFilename } from '@/lib/file-upload-validator'
+import { validateFile, FILE_UPLOAD_CONFIGS } from '@/lib/file-upload-validator'
 
 const ReportsUploader = () => {
   const { control } = useFormContext()
@@ -31,32 +30,21 @@ const ReportsUploader = () => {
     setError(null)
 
     try {
-      const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || 'patient-reports'
-      const fileName = generateSafeFilename(file.name, 'report')
-      const filePath = `reports/${fileName}`
+      // Upload via API route (uses service role key — bypasses Supabase RLS)
+      const formData = new FormData()
+      formData.append('file', file)
 
-      // Upload file to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
+      const response = await fetch('/api/upload-report', {
+        method: 'POST',
+        body: formData,
+      })
 
-      if (uploadError) {
-        throw uploadError
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.message || 'Upload failed')
       }
 
-      // Get public URL - construct it manually for reliability
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-      const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filePath}`
-
-      // Add the file info to the form state
-      const newReport = {
-        url: publicUrl,
-        filename: file.name,
-        uploadedAt: new Date().toISOString(),
-      }
+      const newReport = await response.json()
 
       // Validate with Zod before appending
       reportFileSchema.parse(newReport)
