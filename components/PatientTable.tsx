@@ -128,7 +128,7 @@ const PatientTable: React.FC<PatientTableProps> = ({ patients, totalPatients, cu
       {/* Mobile Card View */}
       <div className="block lg:hidden px-4 py-4 space-y-2">
         {patients.length > 0 ? patients.map((patient) => {
-          const lastVisit = patient.visits[0];
+          const lastVisit = patient.visits?.[0];
           return (
             <div key={patient.id} className="border border-gray-100 rounded-xl p-4 hover:border-brand-teal/30 hover:shadow-sm transition-all">
               <div className="flex justify-between items-start mb-2">
@@ -208,7 +208,7 @@ const PatientTable: React.FC<PatientTableProps> = ({ patients, totalPatients, cu
           </thead>
           <tbody>
             {patients.length > 0 ? patients.map((patient, idx) => {
-              const lastVisit = patient.visits[0];
+              const lastVisit = patient.visits?.[0];
               return (
                 <tr
                   key={patient.id}

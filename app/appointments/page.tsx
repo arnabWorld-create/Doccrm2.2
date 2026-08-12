@@ -43,8 +43,15 @@ export default function AppointmentsPage() {
       const data = await response.json();
       
       // API returns { data: [], pagination: {} } — unwrap accordingly
-      const list = Array.isArray(data) ? data : (data.data ?? []);
-      setAppointments(list);
+      // Guard against any unexpected shape to prevent .map() crash
+      let list: any[] = [];
+      if (Array.isArray(data)) {
+        list = data;
+      } else if (data && Array.isArray(data.data)) {
+        list = data.data;
+      }
+      // Filter out any null/undefined entries that could crash .map()
+      setAppointments(list.filter(Boolean));
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
       setAppointments([]);
@@ -196,13 +203,13 @@ export default function AppointmentsPage() {
                       <div className="flex items-center gap-1.5 text-brand-teal">
                         <Calendar className="h-4 w-4" />
                         <span className="font-semibold text-sm">
-                          {formatDate(appointment.appointmentDate)}
+                          {appointment.appointmentDate ? formatDate(appointment.appointmentDate) : '—'}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-gray-500">
                         <Clock className="h-4 w-4" />
-                        <span className="text-sm font-medium">{appointment.appointmentTime}</span>
-                        <span className="text-xs text-gray-400">({appointment.duration}m)</span>
+                        <span className="text-sm font-medium">{appointment.appointmentTime ?? '—'}</span>
+                        <span className="text-xs text-gray-400">({appointment.duration ?? 0}m)</span>
                       </div>
                     </div>
                   </div>

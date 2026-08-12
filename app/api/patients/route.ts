@@ -98,6 +98,11 @@ export const GET = withMiddleware(
           bloodGroup: true,
           createdAt: true,
           updatedAt: true,
+          visits: {
+            select: { visitDate: true },
+            orderBy: { visitDate: 'desc' },
+            take: 1,
+          },
           _count: {
             select: { visits: true },
           },
