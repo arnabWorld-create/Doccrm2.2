@@ -239,7 +239,7 @@ export function Sidebar() {
             collapsed && !mobile && 'flex-col justify-center items-center px-2 py-3 gap-2'
           )}
         >
-          <div className="bg-brand-red p-1.5 rounded-lg flex-shrink-0">
+          <div className="bg-brand-teal p-1.5 rounded-lg flex-shrink-0">
             <Stethoscope className="h-5 w-5 text-white" />
           </div>
           {(!collapsed || mobile) && (
@@ -324,7 +324,7 @@ export function Sidebar() {
           <Menu className="h-6 w-6" />
         </button>
         <div className="flex items-center gap-2 ml-3">
-          <div className="bg-brand-red p-1 rounded-md">
+          <div className="bg-brand-teal p-1 rounded-md">
             <Stethoscope className="h-4 w-4 text-white" />
           </div>
           <span className="text-lg font-extrabold text-brand-teal">Faith Clinic</span>
