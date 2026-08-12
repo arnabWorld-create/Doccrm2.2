@@ -681,7 +681,7 @@ function FooterSection() {
           </div>
         </div>
 
-        <div className="border-t pt-8">
+        <div className="border-t pt-8 pb-20 md:pb-0">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-600 text-sm">
               © {new Date().getFullYear()} Faith Clinic. All rights reserved.
