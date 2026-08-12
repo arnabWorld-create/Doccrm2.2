@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PatientTable from '@/components/PatientTable';
 import { PageHero } from '@/components/ui/page-hero';
 import { Users } from 'lucide-react';
@@ -17,7 +17,7 @@ interface Patient {
   _count?: { visits: number };
 }
 
-export default function PatientsPage() {
+function PatientsContent() {
   const searchParams = useSearchParams();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [totalPatients, setTotalPatients] = useState(0);
@@ -34,12 +34,12 @@ export default function PatientsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (search)    params.set('search', search);
-      if (page > 1)  params.set('page', String(page));
+      if (search)       params.set('search', search);
+      if (page > 1)     params.set('page', String(page));
       if (limit !== 10) params.set('limit', String(limit));
-      if (startDate) params.set('startDate', startDate);
-      if (endDate)   params.set('endDate', endDate);
-      if (month)     params.set('month', month);
+      if (startDate)    params.set('startDate', startDate);
+      if (endDate)      params.set('endDate', endDate);
+      if (month)        params.set('month', month);
 
       const res = await fetch(`/api/patients?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch');
@@ -85,5 +85,20 @@ export default function PatientsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-5">
+        <div className="h-32 bg-white rounded-2xl animate-pulse border border-gray-100" />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand-teal border-b-transparent" />
+        </div>
+      </div>
+    }>
+      <PatientsContent />
+    </Suspense>
   );
 }
