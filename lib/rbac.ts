@@ -3,7 +3,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from './prisma';
 import { requireAuth } from './api-auth';
 import { ApiErrors } from './api-error';
 
@@ -89,51 +88,20 @@ export function hasPermission(
 
 /**
  * Require authentication and specific role(s)
+ * PERF FIX: reuses the user already fetched by requireAuth — no second DB query.
  */
 export async function requireRole(
   request: NextRequest,
   allowedRoles: UserRole[]
 ): Promise<{ error: NextResponse | null; user: any }> {
-  // First check authentication
+  // requireAuth now returns the full user (id, email, name, role, isActive)
   const { error: authError, user: authUser } = await requireAuth(request);
   if (authError || !authUser) {
     return { error: authError, user: null };
   }
 
-  // Fetch full user from database to get role
-  const fullUser = await prisma.user.findUnique({
-    where: { id: authUser.userId },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      isActive: true,
-    },
-  });
-
-  if (!fullUser) {
-    return {
-      error: NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      ),
-      user: null,
-    };
-  }
-
-  if (!fullUser.isActive) {
-    return {
-      error: NextResponse.json(
-        { error: 'Account is inactive' },
-        { status: 403 }
-      ),
-      user: null,
-    };
-  }
-
-  // Check if user's role is allowed
-  const userRole = fullUser.role as UserRole;
+  // No second DB query needed — role is already on authUser
+  const userRole = authUser.role as UserRole;
   if (!allowedRoles.includes(userRole)) {
     return {
       error: NextResponse.json(
@@ -147,57 +115,35 @@ export async function requireRole(
     };
   }
 
-  return { error: null, user: fullUser };
+  return {
+    error: null,
+    user: {
+      id: authUser.userId,
+      email: authUser.email,
+      name: authUser.name,
+      role: authUser.role,
+      isActive: authUser.isActive,
+    },
+  };
 }
 
 /**
  * Require specific permission
+ * PERF FIX: reuses the user already fetched by requireAuth — no second DB query.
  */
 export async function requirePermission(
   request: NextRequest,
   resource: string,
   action: string
 ): Promise<{ error: NextResponse | null; user: any }> {
-  // First check authentication
+  // requireAuth now returns the full user (id, email, name, role, isActive)
   const { error: authError, user: authUser } = await requireAuth(request);
   if (authError || !authUser) {
     return { error: authError, user: null };
   }
 
-  // Fetch full user from database to get role
-  const fullUser = await prisma.user.findUnique({
-    where: { id: authUser.userId },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      isActive: true,
-    },
-  });
-
-  if (!fullUser) {
-    return {
-      error: NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      ),
-      user: null,
-    };
-  }
-
-  if (!fullUser.isActive) {
-    return {
-      error: NextResponse.json(
-        { error: 'Account is inactive' },
-        { status: 403 }
-      ),
-      user: null,
-    };
-  }
-
-  // Check permission
-  const userRole = fullUser.role as UserRole;
+  // No second DB query needed — role is already on authUser
+  const userRole = authUser.role as UserRole;
   if (!hasPermission(userRole, resource, action)) {
     return {
       error: NextResponse.json(
@@ -211,7 +157,16 @@ export async function requirePermission(
     };
   }
 
-  return { error: null, user: fullUser };
+  return {
+    error: null,
+    user: {
+      id: authUser.userId,
+      email: authUser.email,
+      name: authUser.name,
+      role: authUser.role,
+      isActive: authUser.isActive,
+    },
+  };
 }
 
 /**

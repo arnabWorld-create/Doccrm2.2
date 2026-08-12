@@ -42,9 +42,11 @@ export async function requireAuth(request: NextRequest) {
   // Check user still exists and is active in the database.
   // This ensures a disabled account is blocked immediately — not after
   // the token expires in 7 days.
+  // PERF FIX: fetch name + role here too so requireRole/requirePermission
+  // can reuse this object without a second DB round-trip.
   const user = await prisma.user.findUnique({
     where: { id: decoded.userId },
-    select: { id: true, email: true, role: true, isActive: true },
+    select: { id: true, email: true, name: true, role: true, isActive: true },
   });
 
   if (!user) {
@@ -69,6 +71,7 @@ export async function requireAuth(request: NextRequest) {
 
   return {
     error: null,
-    user: { userId: user.id, email: user.email, role: user.role },
+    // Return full user so callers don't need a second DB query
+    user: { userId: user.id, email: user.email, name: user.name, role: user.role, isActive: user.isActive },
   };
 }

@@ -92,31 +92,65 @@ const AnalyticsPage = async () => {
   eightWeeksAgo.setDate(today.getDate() - 7 * 7);
   eightWeeksAgo.setHours(0, 0, 0, 0);
 
-  // ── DB queries ─────────────────────────────────────────────────────────────
-  const patientStats = await prisma.$queryRaw<Array<{
-    total: bigint; this_month: bigint; last_month: bigint; this_week: bigint;
-    with_records: bigint; male: bigint; female: bigint; other: bigint;
-    age_0_18: bigint; age_19_35: bigint; age_36_50: bigint;
-    age_51_65: bigint; age_65_plus: bigint;
-  }>>`
-    SELECT
-      COUNT(*)::bigint as total,
-      COUNT(*) FILTER (WHERE "createdAt" >= ${startOfMonth})::bigint as this_month,
-      COUNT(*) FILTER (WHERE "createdAt" >= ${startOfLastMonth} AND "createdAt" <= ${endOfLastMonth})::bigint as last_month,
-      COUNT(*) FILTER (WHERE "createdAt" >= ${startOfWeek})::bigint as this_week,
-      COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM visits WHERE visits."patientId" = patients.id AND signs IS NOT NULL))::bigint as with_records,
-      COUNT(*) FILTER (WHERE gender = 'Male')::bigint as male,
-      COUNT(*) FILTER (WHERE gender = 'Female')::bigint as female,
-      COUNT(*) FILTER (WHERE gender = 'Other')::bigint as other,
-      COUNT(*) FILTER (WHERE age IS NOT NULL AND age <= 18)::bigint as age_0_18,
-      COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 18 AND age <= 35)::bigint as age_19_35,
-      COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 35 AND age <= 50)::bigint as age_36_50,
-      COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 50 AND age <= 65)::bigint as age_51_65,
-      COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 65)::bigint as age_65_plus
-    FROM patients
-  `;
+  // ── DB queries — all run in parallel ──────────────────────────────────────
+  const followUpWeekEnd = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const s = patientStats[0];
+  const [patientStatsRaw, recentPatients, visitStatsRaw, appointmentStatsRaw, medicalAnalysis] =
+    await Promise.all([
+      prisma.$queryRaw<Array<{
+        total: bigint; this_month: bigint; last_month: bigint; this_week: bigint;
+        with_records: bigint; male: bigint; female: bigint; other: bigint;
+        age_0_18: bigint; age_19_35: bigint; age_36_50: bigint;
+        age_51_65: bigint; age_65_plus: bigint;
+      }>>`
+        SELECT
+          COUNT(*)::bigint as total,
+          COUNT(*) FILTER (WHERE "createdAt" >= ${startOfMonth})::bigint as this_month,
+          COUNT(*) FILTER (WHERE "createdAt" >= ${startOfLastMonth} AND "createdAt" <= ${endOfLastMonth})::bigint as last_month,
+          COUNT(*) FILTER (WHERE "createdAt" >= ${startOfWeek})::bigint as this_week,
+          COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM visits WHERE visits."patientId" = patients.id AND signs IS NOT NULL))::bigint as with_records,
+          COUNT(*) FILTER (WHERE gender = 'Male')::bigint as male,
+          COUNT(*) FILTER (WHERE gender = 'Female')::bigint as female,
+          COUNT(*) FILTER (WHERE gender = 'Other')::bigint as other,
+          COUNT(*) FILTER (WHERE age IS NOT NULL AND age <= 18)::bigint as age_0_18,
+          COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 18 AND age <= 35)::bigint as age_19_35,
+          COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 35 AND age <= 50)::bigint as age_36_50,
+          COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 50 AND age <= 65)::bigint as age_51_65,
+          COUNT(*) FILTER (WHERE age IS NOT NULL AND age > 65)::bigint as age_65_plus
+        FROM patients
+      `,
+
+      prisma.patient.findMany({
+        select: { createdAt: true },
+        where: { createdAt: { gte: eightWeeksAgo } },
+        orderBy: { createdAt: 'asc' },
+      }),
+
+      prisma.$queryRaw<Array<{
+        today: bigint; upcoming: bigint; this_week: bigint; overdue: bigint;
+      }>>`
+        SELECT
+          COUNT(*) FILTER (WHERE "visitDate" >= ${todayStart} AND "visitDate" < ${todayEnd})::bigint as today,
+          COUNT(*) FILTER (WHERE "followUpDate" >= ${today})::bigint as upcoming,
+          COUNT(*) FILTER (WHERE "followUpDate" >= ${startOfWeek} AND "followUpDate" < ${followUpWeekEnd})::bigint as this_week,
+          COUNT(*) FILTER (WHERE "followUpDate" < ${today})::bigint as overdue
+        FROM visits
+      `,
+
+      prisma.$queryRaw<Array<{
+        total: bigint; with_patient: bigint; without_patient: bigint;
+      }>>`
+        SELECT
+          COUNT(*)::bigint as total,
+          COUNT(*) FILTER (WHERE "patientId" IS NOT NULL)::bigint as with_patient,
+          COUNT(*) FILTER (WHERE "patientId" IS NULL)::bigint as without_patient
+        FROM appointments
+      `,
+
+      getCachedMedicalAnalysis(),
+    ]);
+
+  const s = patientStatsRaw[0];
   const totalPatients               = Number(s.total);
   const patientsThisMonth           = Number(s.this_month);
   const patientsLastMonth           = Number(s.last_month);
@@ -133,43 +167,18 @@ const AnalyticsPage = async () => {
     '65+':   Number(s.age_65_plus),
   };
 
-  const recentPatients = await prisma.patient.findMany({
-    select: { createdAt: true },
-    where: { createdAt: { gte: eightWeeksAgo } },
-    orderBy: { createdAt: 'asc' },
-  });
-
-  const visitStats = await prisma.$queryRaw<Array<{
-    today: bigint; upcoming: bigint; this_week: bigint; overdue: bigint;
-  }>>`
-    SELECT
-      COUNT(*) FILTER (WHERE "visitDate" >= ${todayStart} AND "visitDate" < ${todayEnd})::bigint as today,
-      COUNT(*) FILTER (WHERE "followUpDate" >= ${today})::bigint as upcoming,
-      COUNT(*) FILTER (WHERE "followUpDate" >= ${startOfWeek} AND "followUpDate" < ${new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000)})::bigint as this_week,
-      COUNT(*) FILTER (WHERE "followUpDate" < ${today})::bigint as overdue
-    FROM visits
-  `;
-
-  const v = visitStats[0];
+  const v = visitStatsRaw[0];
   const consultationsToday = Number(v.today);
   const upcomingFollowUps  = Number(v.upcoming);
   const followUpsThisWeek  = Number(v.this_week);
   const overdueFollowUps   = Number(v.overdue);
 
-  const appointmentStats = await prisma.$queryRaw<Array<{
-    total: bigint; with_patient: bigint; without_patient: bigint;
-  }>>`
-    SELECT
-      COUNT(*)::bigint as total,
-      COUNT(*) FILTER (WHERE "patientId" IS NOT NULL)::bigint as with_patient,
-      COUNT(*) FILTER (WHERE "patientId" IS NULL)::bigint as without_patient
-    FROM appointments
-  `;
-
-  const a = appointmentStats[0];
+  const a = appointmentStatsRaw[0];
   const totalAppointments      = Number(a.total);
   const oldPatientAppointments = Number(a.with_patient);
   const newPatientAppointments = Number(a.without_patient);
+
+  const { topConditions, topMedicines } = medicalAnalysis;
 
   // ── Derived values ─────────────────────────────────────────────────────────
   const avgPatientsPerDay = (patientsThisMonth / Math.max(1, today.getDate())).toFixed(1);
@@ -180,8 +189,6 @@ const AnalyticsPage = async () => {
   const completionRate = totalPatients > 0
     ? ((patientsWithCompleteRecords / totalPatients) * 100).toFixed(1)
     : '0';
-
-  const { topConditions, topMedicines } = await getCachedMedicalAnalysis();
 
   // ── Weekly chart data ──────────────────────────────────────────────────────
   const weeksData: Array<{ label: string; count: number }> = [];
