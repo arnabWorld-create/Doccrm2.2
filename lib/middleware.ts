@@ -44,52 +44,29 @@ export function withCORS(request: NextRequest, response: NextResponse) {
 
 /**
  * Security headers middleware
+ * CSP is built once and cached — no need to recompute on every response.
  */
+const _supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co';
+const _appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+const _cachedCsp = [
+  `default-src 'self'`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+  `style-src 'self' 'unsafe-inline'`,
+  `img-src 'self' data: blob: ${_supabaseUrl}`,
+  `connect-src 'self' ${_supabaseUrl} https://*.upstash.io ${_appUrl}`.trim(),
+  `font-src 'self'`,
+  `object-src 'none'`,
+  `base-uri 'self'`,
+  `frame-ancestors 'none'`,
+  `form-action 'self'`,
+].join('; ');
+
 export function withSecurityHeaders(response: NextResponse) {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-
-  // FIX #4: Add Content-Security-Policy.
-  // X-XSS-Protection is deprecated and ignored by Chrome/Firefox — CSP is
-  // the actual defence against XSS for modern browsers.
-  //
-  // Policy breakdown:
-  //   default-src 'self'          — only load resources from same origin by default
-  //   script-src  'self' 'unsafe-inline' 'unsafe-eval'
-  //                               — Next.js needs unsafe-inline for hydration and
-  //                                 unsafe-eval for dev mode. Tighten in future
-  //                                 by adding a nonce-based approach.
-  //   style-src   'self' 'unsafe-inline'
-  //                               — Tailwind inlines styles; unsafe-inline needed
-  //   img-src     'self' data: blob: https://*.supabase.co
-  //                               — Allow images from self, data URIs, and Supabase
-  //   connect-src 'self' https://*.supabase.co https://*.upstash.io
-  //                               — API calls to Supabase and Upstash Redis
-  //   font-src    'self'          — Fonts from same origin only
-  //   object-src  'none'          — Block Flash/plugins entirely
-  //   base-uri    'self'          — Prevent base tag hijacking
-  //   frame-ancestors 'none'      — Equivalent to X-Frame-Options: DENY
-  //   form-action 'self'          — Forms can only submit to same origin
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-
-  const csp = [
-    `default-src 'self'`,
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
-    `style-src 'self' 'unsafe-inline'`,
-    `img-src 'self' data: blob: ${supabaseUrl}`,
-    `connect-src 'self' ${supabaseUrl} https://*.upstash.io ${appUrl}`.trim(),
-    `font-src 'self'`,
-    `object-src 'none'`,
-    `base-uri 'self'`,
-    `frame-ancestors 'none'`,
-    `form-action 'self'`,
-  ].join('; ');
-
-  response.headers.set('Content-Security-Policy', csp);
-
+  response.headers.set('Content-Security-Policy', _cachedCsp);
   return response;
 }
 

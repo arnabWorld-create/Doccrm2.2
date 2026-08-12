@@ -41,7 +41,12 @@ async function handler(request: NextRequest) {
       );
     }
 
-    return successResponse(user, 200, request);
+    const res = successResponse(user, 200, request);
+    // Allow the browser to cache this for 60 s, revalidate in background.
+    // The middleware already validates the JWT on every page load so stale
+    // user data for 60 s is acceptable and saves a DB round-trip per navigation.
+    res.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+    return res;
   } catch (error: unknown) {
     logger.error('Error in /api/auth/me', error);
     const { sanitizeErrorForClient } = await import('@/lib/sanitize-error');

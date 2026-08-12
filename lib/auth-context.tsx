@@ -23,16 +23,50 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+const SESSION_KEY = 'auth_user_cache';
 
-  // Check if user is logged in on mount
+function getCachedUser(): User | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedUser(user: User | null) {
+  try {
+    if (user) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+    }
+  } catch {
+    // sessionStorage unavailable (e.g., SSR) — ignore
+  }
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Initialise from sessionStorage so protected pages render immediately
+  // on client-side navigation without waiting for /api/auth/me
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return getCachedUser();
+  });
+  const [loading, setLoading] = useState(() => {
+    // If we already have a cached user, start as not-loading.
+    // We'll still revalidate in the background.
+    if (typeof window === 'undefined') return true;
+    return getCachedUser() === null;
+  });
+
   useEffect(() => {
+    // Always revalidate in the background, but only block UI if no cache
     const checkAuth = async () => {
       await refreshUser();
     };
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const refreshUser = async () => {
@@ -43,57 +77,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
+        setCachedUser(data);
       } else {
         setUser(null);
+        setCachedUser(null);
       }
-    } catch (error) {
-      // Silently fail - user is not logged in
+    } catch {
       setUser(null);
+      setCachedUser(null);
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
+    });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || error.error || 'Login failed');
-      }
-
-      const data = await response.json();
-      setUser(data.user);
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || error.error || 'Login failed');
     }
+
+    const data = await response.json();
+    setUser(data.user);
+    setCachedUser(data.user);
   };
 
   const register = async (email: string, password: string, name: string) => {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
-        credentials: 'include',
-      });
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+      credentials: 'include',
+    });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || error.error || 'Registration failed');
-      }
-
-      const data = await response.json();
-      setUser(data.user);
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || error.error || 'Registration failed');
     }
+
+    const data = await response.json();
+    setUser(data.user);
+    setCachedUser(data.user);
   };
 
   const logout = async () => {
@@ -106,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      setCachedUser(null);
     }
   };
 

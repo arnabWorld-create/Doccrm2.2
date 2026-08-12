@@ -44,7 +44,12 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json(profile);
+    return NextResponse.json(profile, {
+      headers: {
+        // Cache clinic profile in the browser for 5 minutes — it rarely changes
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     logger.error('Failed to fetch clinic profile', error);
     return NextResponse.json(

@@ -99,12 +99,28 @@ export function Sidebar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Fetch doctor name
+  // Fetch doctor name — cached in sessionStorage to avoid a DB hit on every navigation
   useEffect(() => {
     if (!isAuthenticated) return;
+
+    const CACHE_KEY = 'clinic_profile_cache';
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const p = JSON.parse(cached);
+        setDoctorName(p?.doctorName || user?.name || 'Doctor');
+        return;
+      } catch {
+        sessionStorage.removeItem(CACHE_KEY);
+      }
+    }
+
     fetch('/api/clinic-profile')
       .then((r) => r.ok ? r.json() : null)
       .then((p) => {
+        if (p) {
+          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(p)); } catch {}
+        }
         if (p?.doctorName) setDoctorName(p.doctorName);
         else setDoctorName(user?.name || 'Doctor');
       })

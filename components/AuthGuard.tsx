@@ -13,8 +13,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const publicPaths = ['/auth/', '/'];
   const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path));
 
-  // FIX: useEffect must be called unconditionally (Rules of Hooks).
-  // The redirect only fires when we're on a protected path AND not authenticated.
   useEffect(() => {
     if (!isPublicPath && !loading && !isAuthenticated) {
       router.push('/auth/login');
@@ -26,17 +24,23 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Show loading state while checking auth OR if not authenticated
-  // This prevents flash of content before redirect
-  if (loading || !isAuthenticated) {
+  // While the /api/auth/me request is in flight, show a lightweight bar
+  // instead of blocking the entire page with a spinner.
+  // Once auth resolves, content renders immediately with no extra round-trip.
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-brand-teal mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Thin progress bar at top — much less jarring than a full-screen spinner */}
+        <div className="fixed top-0 left-0 right-0 h-0.5 bg-brand-teal/20 z-50">
+          <div className="h-full bg-brand-teal animate-pulse w-1/3" />
         </div>
       </div>
     );
+  }
+
+  // Not authenticated — redirect is in progress, show nothing
+  if (!isAuthenticated) {
+    return null;
   }
 
   // User is authenticated, show content
