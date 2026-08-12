@@ -1,101 +1,64 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PatientTable from '@/components/PatientTable';
-import prisma from '@/lib/prisma';
-import { Suspense } from 'react';
 import { PageHero } from '@/components/ui/page-hero';
 import { Users } from 'lucide-react';
 
-// Force dynamic rendering - don't pre-render at build time
-export const dynamic = 'force-dynamic';
-
-interface PatientsPageProps {
-  searchParams?: {
-    search?: string;
-    page?: string;
-    limit?: string;
-    startDate?: string;
-    endDate?: string;
-    month?: string;
-  };
+interface Patient {
+  id: string;
+  patientId: string;
+  name: string;
+  age: number | null;
+  gender: string | null;
+  contact: string | null;
+  visits: { visitDate: Date }[];
+  _count?: { visits: number };
 }
 
-const PatientsPage = async ({ searchParams }: PatientsPageProps) => {
-  const search = searchParams?.search || '';
-  const currentPage = Number(searchParams?.page) || 1;
-  const perPage = Number(searchParams?.limit) || 10;
-  const startDate = searchParams?.startDate;
-  const endDate = searchParams?.endDate;
-  const month = searchParams?.month;
+export default function PatientsPage() {
+  const searchParams = useSearchParams();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Build where clause with search and date filters
-  const whereClause: any = {};
+  const search    = searchParams.get('search')    || '';
+  const page      = Number(searchParams.get('page'))  || 1;
+  const limit     = Number(searchParams.get('limit')) || 10;
+  const startDate = searchParams.get('startDate') || '';
+  const endDate   = searchParams.get('endDate')   || '';
+  const month     = searchParams.get('month')     || '';
 
-  // Search filter
-  if (search) {
-    whereClause.OR = [
-      { name: { contains: search, mode: 'insensitive' as const } },
-      { contact: { contains: search, mode: 'insensitive' as const } },
-      { patientId: { contains: search, mode: 'insensitive' as const } },
-    ];
-  }
+  const fetchPatients = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (search)    params.set('search', search);
+      if (page > 1)  params.set('page', String(page));
+      if (limit !== 10) params.set('limit', String(limit));
+      if (startDate) params.set('startDate', startDate);
+      if (endDate)   params.set('endDate', endDate);
+      if (month)     params.set('month', month);
 
-  // Date range filter on visits
-  const visitFilter: any = {};
-  if (month) {
-    // Parse month (format: YYYY-MM)
-    const [year, monthNum] = month.split('-').map(Number);
-    const monthStart = new Date(year, monthNum - 1, 1);
-    const monthEnd = new Date(year, monthNum, 1);
-    
-    visitFilter.visitDate = {
-      gte: monthStart,
-      lt: monthEnd,
-    };
-  } else if (startDate || endDate) {
-    visitFilter.visitDate = {};
-    if (startDate) {
-      visitFilter.visitDate.gte = new Date(startDate);
+      const res = await fetch(`/api/patients?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+
+      setPatients(data.data || []);
+      setTotalPatients(data.pagination?.total ?? 0);
+    } catch (err) {
+      console.error('Failed to fetch patients:', err);
+      setPatients([]);
+      setTotalPatients(0);
+    } finally {
+      setLoading(false);
     }
-    if (endDate) {
-      const endDateTime = new Date(endDate);
-      endDateTime.setDate(endDateTime.getDate() + 1);
-      visitFilter.visitDate.lt = endDateTime;
-    }
-  }
+  }, [search, page, limit, startDate, endDate, month]);
 
-  // If date filter is applied, filter by visits
-  if (Object.keys(visitFilter).length > 0) {
-    whereClause.visits = {
-      some: visitFilter,
-    };
-  }
-
-  const [patients, totalPatients] = await Promise.all([
-    prisma.patient.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        patientId: true,
-        name: true,
-        age: true,
-        gender: true,
-        contact: true,
-        // Only pull the most-recent visit date for "Last Visit" column
-        visits: {
-          select: { visitDate: true },
-          orderBy: { visitDate: 'desc' },
-          take: 1,
-        },
-        // Use _count so the "Visits" column always shows the real total
-        _count: {
-          select: { visits: true },
-        },
-      },
-      skip: (currentPage - 1) * perPage,
-      take: perPage,
-      orderBy: { updatedAt: 'desc' },
-    }),
-    prisma.patient.count({ where: whereClause }),
-  ]);
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
 
   return (
     <div className="space-y-5">
@@ -108,20 +71,19 @@ const PatientsPage = async ({ searchParams }: PatientsPageProps) => {
           { label: 'Total', value: totalPatients.toLocaleString('en-IN') },
         ]}
       />
-      <Suspense fallback={
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand-teal border-b-transparent"></div>
+
+      {loading ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand-teal border-b-transparent" />
         </div>
-      }>
+      ) : (
         <PatientTable
           patients={patients}
           totalPatients={totalPatients}
-          currentPage={currentPage}
-          perPage={perPage}
+          currentPage={page}
+          perPage={limit}
         />
-      </Suspense>
+      )}
     </div>
   );
-};
-
-export default PatientsPage;
+}

@@ -116,7 +116,7 @@ export const GET = withMiddleware(
       total,
     });
 
-    return successResponse(
+    const response = successResponse(
       {
         data: patients,
         pagination: {
@@ -129,6 +129,10 @@ export const GET = withMiddleware(
       200,
       request
     );
+    // Cache patient list for 30s in the browser — stale-while-revalidate
+    // means the browser shows cached data instantly and refreshes in background
+    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+    return response;
   },
   {
     rateLimit: RATE_LIMITS.API,
