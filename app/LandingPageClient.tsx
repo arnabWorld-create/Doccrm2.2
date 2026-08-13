@@ -7,14 +7,13 @@ import { Card } from '@/components/ui/card';
 import { 
   Star, Clock, MapPin, Phone, LogIn, Menu,
   Award, Heart, Users, TrendingUp, Activity, Droplet,
-  Shield, Stethoscope, Syringe, Pill, Quote, MessageCircle,
+  Shield, Stethoscope, Syringe, Pill, Quote,
   Instagram, Video, ExternalLink
 } from 'lucide-react';
 import { useState } from 'react';
 
-const WHATSAPP_NUMBER = '919429907575';
-const WHATSAPP_BOOKING_MSG = encodeURIComponent("Hi, I'd like to book an appointment at Faith Clinic.");
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_BOOKING_MSG}`;
+const CALL_LINK = 'tel:+919429907575';
+const CALL_NUMBER = '+91 94299 07575';
 const INSTAGRAM_LINK = 'https://www.instagram.com/dr.aishwarya.faithclinic.abad?utm_source=qr';
 const YOUTUBE_LINK = 'https://www.youtube.com/@draishwaryafaithclinic/shorts';
 
@@ -46,17 +45,15 @@ export default function LandingPageClient() {
             </nav>
 
             <div className="hidden md:flex items-center space-x-3">
-              <a href="tel:+919429907575" className="flex items-center text-sm text-gray-600 hover:text-teal-600 transition-colors">
+              <a href={CALL_LINK} className="flex items-center text-sm text-gray-600 hover:text-teal-600 transition-colors">
                 <Phone className="w-4 h-4 mr-2" />
-                +91 94299 07575
+                {CALL_NUMBER}
               </a>
               <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
+                href={CALL_LINK}
+                className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
               >
-                <MessageCircle className="w-4 h-4" />
+                <Phone className="w-4 h-4" />
                 Book Appointment
               </a>
             </div>
@@ -80,12 +77,10 @@ export default function LandingPageClient() {
                 <a href="#testimonials" className="hover:text-teal-600 transition-colors">Testimonials</a>
                 <a href="#contact" className="hover:text-teal-600 transition-colors">Contact</a>
                 <a
-                  href={WHATSAPP_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-green-500 text-white font-semibold px-4 py-2 rounded-full w-fit transition-colors"
+                  href={CALL_LINK}
+                  className="flex items-center gap-2 bg-teal-600 text-white font-semibold px-4 py-2 rounded-full w-fit transition-colors"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <Phone className="w-4 h-4" />
                   Book Appointment
                 </a>
               </nav>
@@ -120,15 +115,13 @@ export default function LandingPageClient() {
       {/* Footer */}
       <FooterSection />
 
-      {/* Floating WhatsApp button — mobile */}
+      {/* Floating Call button — mobile */}
       <a
-        href={WHATSAPP_LINK}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Book appointment via WhatsApp"
-        className="fixed bottom-6 right-6 z-50 md:hidden flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-full shadow-xl transition-colors"
+        href={CALL_LINK}
+        aria-label="Call to book appointment"
+        className="fixed bottom-6 right-6 z-50 md:hidden flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-5 py-3 rounded-full shadow-xl transition-colors"
       >
-        <MessageCircle className="w-5 h-5" />
+        <Phone className="w-5 h-5" />
         Book Appointment
       </a>
     </div>
@@ -172,16 +165,16 @@ function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="text-lg bg-green-500 hover:bg-green-600 text-white border-0">
-                <MessageCircle className="mr-2" />
-                Book Appointment on WhatsApp
+            <a href={CALL_LINK}>
+              <Button size="lg" className="text-lg bg-teal-600 hover:bg-teal-700 text-white border-0">
+                <Phone className="mr-2" />
+                Book Appointment — Call Us
               </Button>
             </a>
-            <a href="tel:+919429907575">
+            <a href={CALL_LINK}>
               <Button variant="outline" size="lg" className="text-lg">
                 <Phone className="mr-2" />
-                Call Us
+                {CALL_NUMBER}
               </Button>
             </a>
           </div>
@@ -611,15 +604,15 @@ function ContactSection() {
             Book your appointment with Dr. Aishwarya Radia today
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-white text-green-600 font-semibold px-8 py-4 rounded-full hover:bg-green-50 transition-colors text-lg shadow-lg">
-              <MessageCircle className="w-5 h-5" aria-hidden="true" />
-              Book via WhatsApp
+            <a href={CALL_LINK}
+              className="inline-flex items-center justify-center gap-2 bg-white text-teal-600 font-semibold px-8 py-4 rounded-full hover:bg-teal-50 transition-colors text-lg shadow-lg">
+              <Phone className="w-5 h-5" aria-hidden="true" />
+              Book via Call
             </a>
-            <a href="tel:+919429907575"
+            <a href={CALL_LINK}
               className="inline-flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-8 py-4 rounded-full transition-colors text-lg border border-white/40">
               <Phone className="w-5 h-5" aria-hidden="true" />
-              Call +91 94299 07575
+              Call {CALL_NUMBER}
             </a>
           </div>
         </div>
@@ -654,8 +647,8 @@ function FooterSection() {
               <a href={YOUTUBE_LINK} target="_blank" rel="noopener noreferrer" aria-label="Watch Faith Clinic on YouTube" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all">
                 <Video className="w-5 h-5" aria-hidden="true" />
               </a>
-              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" aria-label="Book appointment via WhatsApp" className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all">
-                <MessageCircle className="w-5 h-5" aria-hidden="true" />
+              <a href={CALL_LINK} aria-label="Call Faith Clinic to book appointment" className="bg-teal-600 hover:bg-teal-700 text-white p-2 rounded-lg transition-all">
+                <Phone className="w-5 h-5" aria-hidden="true" />
               </a>
             </div>
           </div>
