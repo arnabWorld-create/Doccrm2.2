@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
+import { withMiddleware, successResponse } from '@/lib/middleware';
+import { RATE_LIMITS } from '@/lib/redis-rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
-  try {
-    const response = NextResponse.json({ message: 'Logout successful' }, { status: 200 });
+export const POST = withMiddleware(
+  async (request: NextRequest) => {
+    const response = successResponse({ message: 'Logout successful' }, 200, request);
     response.cookies.set({
       name: 'auth-token',
       value: '',
@@ -16,8 +17,6 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
     return response;
-  } catch (error) {
-    logger.error('Logout error', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
+  },
+  { rateLimit: RATE_LIMITS.AUTH }
+);

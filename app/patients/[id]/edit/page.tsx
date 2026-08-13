@@ -1,6 +1,8 @@
+import { cookies } from 'next/headers';
+import { redirect, notFound } from 'next/navigation';
+import { verifyToken } from '@/lib/auth';
 import PatientForm from '@/components/PatientForm';
 import prisma from '@/lib/prisma';
-import { notFound } from 'next/navigation';
 
 interface EditPatientPageProps {
   params: {
@@ -9,6 +11,12 @@ interface EditPatientPageProps {
 }
 
 const EditPatientPage = async ({ params }: EditPatientPageProps) => {
+  // Server-side auth guard
+  const token = cookies().get('auth-token')?.value;
+  if (!token || !verifyToken(token)) {
+    redirect('/auth/login');
+  }
+
   const patient = await prisma.patient.findUnique({
     where: { id: params.id },
     include: {

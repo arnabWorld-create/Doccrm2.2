@@ -81,36 +81,11 @@ export default function PaymentsPage() {
         setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.data || paymentsData.payments || []);
       }
 
-      // Fetch visits for patient analytics — include fees for accurate revenue
-      const visitsRes = await fetch('/api/patients?analytics=true&limit=1000');
-      if (visitsRes.ok) {
-        const patientsData = await visitsRes.json();
-        const allVisits: Visit[] = [];
-        
-        if (patientsData.data) {
-          // patientsData.data only has visit counts (_count), not full visit records.
-          // Fetch full visit data per patient would be N+1. Instead, use the
-          // /api/invoices/summary which already has fee data from visit_fees.
-          // Visits here are only needed for paidBy / patientId grouping.
-          patientsData.data.forEach((patient: any) => {
-            if (patient.visits) {
-              patient.visits.forEach((visit: any) => {
-                allVisits.push({
-                  id: visit.id,
-                  patientId: patient.id,
-                  patientName: patient.name,
-                  visitDate: visit.visitDate,
-                  notes: visit.notes,
-                  paidBy: visit.paidBy,
-                  fees: visit.fees || [],
-                });
-              });
-            }
-          });
-        }
-        
-        setVisits(allVisits);
-      }
+      // Visit-level analytics (paidBy grouping, per-patient revenue) are handled
+      // by the PatientVisitAnalytics component via /api/patients/analytics.
+      // We no longer need a bulk patient dump here — it was always returning an
+      // empty visits array anyway because the patients list endpoint only returns
+      // the most-recent visitDate, not full visit records.
     } catch (error) {
       notificationManager.error('Error', 'Failed to load payment data');
       console.error('Failed to fetch data:', error);

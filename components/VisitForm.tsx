@@ -180,14 +180,14 @@ const VisitForm: React.FC<VisitFormProps> = ({ patientId, initialData, onSubmit:
         }
       }
 
-      // Handle fees - add them to notes if present
-      if (data.visitFees && Array.isArray(data.visitFees) && data.visitFees.length > 0) {
-        const feesData = {
-          fees: data.visitFees,
-          total: data.totalFeeAmount || data.visitFees.reduce((sum: number, f: any) => sum + f.total, 0),
-        };
-        const feesJson = `__FEES_JSON__${JSON.stringify(feesData)}__FEES_JSON__`;
-        data.notes = data.notes ? `${data.notes}\n${feesJson}` : feesJson;
+      // Fees are sent as visitFees array — the API writes them to the VisitFee
+      // table directly. Do NOT embed them in notes anymore.
+      // Strip any legacy __FEES_JSON__ markers that might have been loaded
+      // from old visit notes (edit mode) so they don't get re-saved.
+      if (typeof data.notes === 'string') {
+        data.notes = data.notes
+          .replace(/__FEES_JSON__[\s\S]*?__FEES_JSON__/g, '')
+          .trim() || null;
       }
 
       // Use custom onSubmit if provided (for edit mode)
@@ -281,7 +281,16 @@ const VisitForm: React.FC<VisitFormProps> = ({ patientId, initialData, onSubmit:
         </div>
 
         {/* Visit Fees */}
-        <VisitFeeForm initialNotes={initialData?.notes} />
+        <VisitFeeForm
+          initialFees={initialData?.fees?.map((f: any) => ({
+            id: f.id,
+            serviceName: f.serviceName,
+            amount: f.amount,
+            quantity: f.quantity,
+            discount: f.discount,
+            total: f.total,
+          }))}
+        />
 
         {error && (
           <div className="bg-brand-red/10 border-l-4 border-brand-red p-4 rounded-lg">

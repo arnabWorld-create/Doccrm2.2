@@ -1,76 +1,63 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { requirePermission } from '@/lib/rbac';
+import { withMiddleware, successResponse } from '@/lib/middleware';
+import { ApiErrors } from '@/lib/api-error';
 import { logger } from '@/lib/logger';
+import { RATE_LIMITS } from '@/lib/redis-rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Fetch all custom medicines
-export async function GET(req: NextRequest) {
-  const { error } = await requirePermission(req, 'settings', 'read');
-  if (error) return error;
+const createMedicineSchema = z.object({
+  name: z.string().min(4, 'Medicine name must be at least 4 characters').max(200),
+});
 
-  try {
+// GET - Fetch all custom medicines
+export const GET = withMiddleware(
+  async (request: NextRequest) => {
+    const { error } = await requirePermission(request, 'settings', 'read');
+    if (error) throw error;
+
     const customMedicines = await prisma.customMedicine.findMany({
-      orderBy: [
-        { usageCount: 'desc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ usageCount: 'desc' }, { name: 'asc' }],
     });
 
-    return NextResponse.json(customMedicines);
-  } catch (error) {
-    logger.error('Failed to fetch custom medicines', error);
-    return NextResponse.json({ message: 'Failed to fetch medicines' }, { status: 500 });
-  }
-}
+    return successResponse(customMedicines, 200, request);
+  },
+  { rateLimit: RATE_LIMITS.API }
+);
 
-// POST - Add or update custom medicine
-export async function POST(req: NextRequest) {
-  const { error } = await requirePermission(req, 'settings', 'write');
-  if (error) return error;
+// POST - Add or increment usage count of a custom medicine
+export const POST = withMiddleware(
+  async (request: NextRequest, data) => {
+    const { error } = await requirePermission(request, 'settings', 'write');
+    if (error) throw error;
 
-  try {
-    const { name } = await req.json();
+    const trimmedName = data.name.trim();
 
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json(
-        { message: 'Medicine name is required' },
-        { status: 400 }
-      );
-    }
-
-    const trimmedName = name.trim();
-
-    // Validate minimum length (prevent incomplete entries like "be", "bec", "beco")
-    if (trimmedName.length < 4) {
-      return NextResponse.json(
-        { message: 'Medicine name must be at least 4 characters' },
-        { status: 400 }
-      );
-    }
-
-    // Check if medicine already exists
     const existing = await prisma.customMedicine.findUnique({
       where: { name: trimmedName },
     });
 
     if (existing) {
-      // Increment usage count
       const updated = await prisma.customMedicine.update({
         where: { name: trimmedName },
         data: { usageCount: existing.usageCount + 1 },
       });
-      return NextResponse.json(updated);
-    } else {
-      // Create new medicine
-      const newMedicine = await prisma.customMedicine.create({
-        data: { name: trimmedName },
-      });
-      return NextResponse.json(newMedicine, { status: 201 });
+      logger.info('Medicine usage incremented', { name: trimmedName });
+      return successResponse(updated, 200, request);
     }
-  } catch (error) {
-    logger.error('Failed to save custom medicine', error);
-    return NextResponse.json({ message: 'Failed to save medicine' }, { status: 500 });
+
+    const newMedicine = await prisma.customMedicine.create({
+      data: { name: trimmedName },
+    });
+    logger.info('Medicine created', { name: trimmedName });
+    return successResponse(newMedicine, 201, request);
+  },
+  {
+    rateLimit: RATE_LIMITS.API,
+    validateSchema: createMedicineSchema,
+    validateSource: 'body',
   }
-}
+);

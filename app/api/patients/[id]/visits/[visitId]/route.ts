@@ -21,6 +21,7 @@ export async function GET(
       },
       include: {
         medications: true,
+        fees: true,
       },
     });
 
@@ -71,7 +72,10 @@ export async function PUT(
         diagnosis: body.diagnosis || null,
         treatment: body.treatment || null,
         medicines: body.medicines || null,
-        notes: body.notes || null,
+        // Strip any legacy __FEES_JSON__ markers from notes before saving
+        notes: body.notes
+          ? body.notes.replace(/__FEES_JSON__[\s\S]*?__FEES_JSON__/g, '').trim() || null
+          : null,
         temp: body.temp ? parseFloat(body.temp) : null,
         spo2: body.spo2 ? parseInt(body.spo2) : null,
         pulse: body.pulse ? parseInt(body.pulse) : null,
@@ -121,10 +125,29 @@ export async function PUT(
         }
       }
 
-      // Return visit with medications
+      // Update VisitFees only when the client explicitly sends a visitFees array.
+      // If visitFees is undefined (old clients / requests that don't touch fees),
+      // leave the existing fee rows untouched — prevents accidental data loss.
+      if (body.visitFees !== undefined) {
+        await tx.visitFee.deleteMany({ where: { visitId: params.visitId } });
+        if (Array.isArray(body.visitFees) && body.visitFees.length > 0) {
+          await tx.visitFee.createMany({
+            data: body.visitFees.map((fee: any) => ({
+              visitId: params.visitId,
+              serviceName: fee.serviceName || 'Service',
+              amount: parseFloat(fee.amount) || 0,
+              quantity: parseInt(fee.quantity) || 1,
+              discount: parseFloat(fee.discount) || 0,
+              total: parseFloat(fee.total) || 0,
+            })),
+          });
+        }
+      }
+
+      // Return visit with medications and fees
       return tx.visit.findUnique({
         where: { id: params.visitId },
-        include: { medications: true },
+        include: { medications: true, fees: true },
       });
     });
 

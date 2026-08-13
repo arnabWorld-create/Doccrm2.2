@@ -1,70 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { requirePermission } from '@/lib/rbac';
+import { withMiddleware, successResponse } from '@/lib/middleware';
+import { ApiErrors } from '@/lib/api-error';
 import { logger } from '@/lib/logger';
+import { RATE_LIMITS } from '@/lib/redis-rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Fetch appointments with filters and pagination
-export async function GET(req: NextRequest) {
-  const { error } = await requirePermission(req, 'appointments', 'read');
-  if (error) return error;
+const createAppointmentSchema = z.object({
+  patientId:          z.string().optional().nullable(),
+  tempPatientName:    z.string().max(200).optional().nullable(),
+  tempPatientContact: z.string().max(20).optional().nullable(),
+  appointmentDate:    z.string(),
+  appointmentTime:    z.string().max(20),
+  duration:           z.number().int().min(5).max(480).optional(),
+  appointmentType:    z.enum(['Consultation', 'Follow-up', 'Check-up', 'Emergency']).optional(),
+  status:             z.enum(['Scheduled', 'Confirmed', 'Completed', 'Cancelled', 'No-Show']).optional(),
+  reason:             z.string().max(1000).optional().nullable(),
+  notes:              z.string().max(2000).optional().nullable(),
+}).refine(
+  (d) => d.patientId || d.tempPatientName,
+  { message: 'Either patientId or tempPatientName is required' }
+);
 
-  try {
-    // Check if Appointment model exists
+// GET - Fetch appointments with filters and pagination
+export const GET = withMiddleware(
+  async (request: NextRequest) => {
+    const { error } = await requirePermission(request, 'appointments', 'read');
+    if (error) throw error;
+
     if (!prisma.appointment) {
-      return NextResponse.json({ data: [], pagination: { total: 0, page: 1, limit: 50, pages: 0 } }, { status: 200 });
+      return successResponse(
+        { data: [], pagination: { total: 0, page: 1, limit: 50, pages: 0 } },
+        200,
+        request
+      );
     }
 
-    const { searchParams } = new URL(req.url);
-    const date = searchParams.get('date');
-    const status = searchParams.get('status');
-    const patientId = searchParams.get('patientId');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const skip = (page - 1) * limit;
+    const { searchParams } = new URL(request.url);
+    const date       = searchParams.get('date');
+    const status     = searchParams.get('status');
+    const patientId  = searchParams.get('patientId');
+    const startDate  = searchParams.get('startDate');
+    const endDate    = searchParams.get('endDate');
+    const page       = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit      = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')));
+    const skip       = (page - 1) * limit;
 
     const where: any = {};
 
-    // Filter by specific date
     if (date) {
       const targetDate = new Date(date);
       const nextDay = new Date(targetDate);
       nextDay.setDate(nextDay.getDate() + 1);
-      
-      where.appointmentDate = {
-        gte: targetDate,
-        lt: nextDay,
-      };
+      where.appointmentDate = { gte: targetDate, lt: nextDay };
+    } else if (startDate || endDate) {
+      where.appointmentDate = {};
+      if (startDate) where.appointmentDate.gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setDate(end.getDate() + 1);
+        where.appointmentDate.lt = end;
+      }
     }
 
-    // Filter by date range
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      end.setDate(end.getDate() + 1);
-      where.appointmentDate = { gte: start, lt: end };
-    } else if (startDate) {
-      where.appointmentDate = { gte: new Date(startDate) };
-    } else if (endDate) {
-      const end = new Date(endDate);
-      end.setDate(end.getDate() + 1);
-      where.appointmentDate = { lt: end };
-    }
+    if (status)    where.status    = status;
+    if (patientId) where.patientId = patientId;
 
-    // Filter by status
-    if (status) {
-      where.status = status;
-    }
-
-    // Filter by patient
-    if (patientId) {
-      where.patientId = patientId;
-    }
-
-    // Batch queries for better performance
     const [appointments, total] = await Promise.all([
       prisma.appointment.findMany({
         where,
@@ -82,96 +86,57 @@ export async function GET(req: NextRequest) {
           tempPatientContact: true,
           patient: {
             select: {
-              id: true,
-              patientId: true,
-              name: true,
-              age: true,
-              gender: true,
-              contact: true,
+              id: true, patientId: true, name: true,
+              age: true, gender: true, contact: true,
             },
           },
         },
-        orderBy: [
-          { appointmentDate: 'asc' },
-          { appointmentTime: 'asc' },
-        ],
+        orderBy: [{ appointmentDate: 'asc' }, { appointmentTime: 'asc' }],
         skip,
         take: limit,
       }),
       prisma.appointment.count({ where }),
     ]);
 
-    return NextResponse.json({
-      data: appointments,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-      },
-    }, {
-      headers: {
-        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
-      },
-    });
-  } catch (error) {
-    logger.error('Failed to fetch appointments', error);
-    return NextResponse.json(
-      { message: 'Failed to fetch appointments' },
-      { status: 500 }
+    const response = successResponse(
+      { data: appointments, pagination: { total, page, limit, pages: Math.ceil(total / limit) } },
+      200,
+      request
     );
-  }
-}
+    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+    return response;
+  },
+  { rateLimit: RATE_LIMITS.API }
+);
 
 // POST - Create new appointment
-export async function POST(req: NextRequest) {
-  const { error } = await requirePermission(req, 'appointments', 'write');
-  if (error) return error;
-
-  try {
-    const body = await req.json();
-
-    // Validate required fields
-    if (!body.appointmentDate || !body.appointmentTime) {
-      return NextResponse.json(
-        { message: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Must have either patientId OR tempPatientName
-    if (!body.patientId && !body.tempPatientName) {
-      return NextResponse.json(
-        { message: 'Either patientId or tempPatientName is required' },
-        { status: 400 }
-      );
-    }
+export const POST = withMiddleware(
+  async (request: NextRequest, data) => {
+    const { error } = await requirePermission(request, 'appointments', 'write');
+    if (error) throw error;
 
     const appointment = await prisma.appointment.create({
       data: {
-        patientId: body.patientId || null,
-        appointmentDate: new Date(body.appointmentDate),
-        appointmentTime: body.appointmentTime,
-        duration: body.duration || 30,
-        appointmentType: body.appointmentType || 'Consultation',
-        status: body.status || 'Scheduled',
-        reason: body.reason || null,
-        notes: body.notes || null,
-        tempPatientName: body.tempPatientName || null,
-        tempPatientContact: body.tempPatientContact || null,
+        patientId:          data.patientId || null,
+        appointmentDate:    new Date(data.appointmentDate),
+        appointmentTime:    data.appointmentTime,
+        duration:           data.duration ?? 30,
+        appointmentType:    data.appointmentType ?? 'Consultation',
+        status:             data.status ?? 'Scheduled',
+        reason:             data.reason || null,
+        notes:              data.notes || null,
+        tempPatientName:    data.tempPatientName || null,
+        tempPatientContact: data.tempPatientContact || null,
       },
-      include: {
-        patient: true,
-      },
+      include: { patient: true },
     });
 
-    return NextResponse.json(appointment, { status: 201 });
-  } catch (error: unknown) {
-    logger.error('Failed to create appointment', error);
-    const { sanitizeErrorForClient } = await import('@/lib/sanitize-error');
-    return NextResponse.json(
-      { message: sanitizeErrorForClient(error) },
-      { status: 500 }
-    );
+    logger.info('Appointment created', { appointmentId: appointment.id });
+    return successResponse(appointment, 201, request);
+  },
+  {
+    rateLimit: RATE_LIMITS.API,
+    validateSchema: createAppointmentSchema,
+    validateSource: 'body',
   }
-}
+);

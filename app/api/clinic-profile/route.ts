@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { requirePermission } from '@/lib/rbac';
+import { withMiddleware, successResponse } from '@/lib/middleware';
 import { logger } from '@/lib/logger';
+import { RATE_LIMITS } from '@/lib/redis-rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +30,11 @@ const updateClinicProfileSchema = z.object({
 });
 
 // GET - Fetch clinic profile
-export async function GET(req: NextRequest) {
-  const { error } = await requirePermission(req, 'settings', 'read');
-  if (error) return error;
+export const GET = withMiddleware(
+  async (request: NextRequest) => {
+    const { error } = await requirePermission(request, 'settings', 'read');
+    if (error) throw error;
 
-  try {
     let profile = await prisma.clinicProfile.findFirst();
 
     if (!profile) {
@@ -44,58 +46,39 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json(profile, {
-      headers: {
-        // Cache clinic profile in the browser for 5 minutes — it rarely changes
-        'Cache-Control': 'private, max-age=300, stale-while-revalidate=600',
-      },
-    });
-  } catch (error) {
-    logger.error('Failed to fetch clinic profile', error);
-    return NextResponse.json(
-      { message: 'Failed to fetch clinic profile' },
-      { status: 500 }
-    );
-  }
-}
+    const response = successResponse(profile, 200, request);
+    // Clinic profile rarely changes — cache for 5 minutes
+    response.headers.set('Cache-Control', 'private, max-age=300, stale-while-revalidate=600');
+    return response;
+  },
+  { rateLimit: RATE_LIMITS.API }
+);
 
 // PUT - Update clinic profile
-export async function PUT(req: NextRequest) {
-  const { error } = await requirePermission(req, 'settings', 'write');
-  if (error) return error;
-
-  try {
-    const rawBody = await req.json();
-    const parsed = updateClinicProfileSchema.safeParse(rawBody);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { message: 'Invalid input', errors: parsed.error.flatten().fieldErrors },
-        { status: 422 }
-      );
-    }
-
-    const body = parsed.data;
+export const PUT = withMiddleware(
+  async (request: NextRequest, data) => {
+    const { error } = await requirePermission(request, 'settings', 'write');
+    if (error) throw error;
 
     let profile = await prisma.clinicProfile.findFirst();
 
     if (profile) {
       profile = await prisma.clinicProfile.update({
         where: { id: profile.id },
-        data: body,
+        data,
       });
     } else {
       profile = await prisma.clinicProfile.create({
-        data: { clinicName: 'Faith Clinic', ...body },
+        data: { clinicName: 'Faith Clinic', ...data },
       });
     }
 
-    return NextResponse.json(profile);
-  } catch (error) {
-    logger.error('Failed to update clinic profile', error);
-    return NextResponse.json(
-      { message: 'Failed to update clinic profile' },
-      { status: 500 }
-    );
+    logger.info('Clinic profile updated');
+    return successResponse(profile, 200, request);
+  },
+  {
+    rateLimit: RATE_LIMITS.STRICT,
+    validateSchema: updateClinicProfileSchema,
+    validateSource: 'body',
   }
-}
+);

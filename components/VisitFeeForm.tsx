@@ -5,7 +5,7 @@ import { DollarSign, Plus, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { notificationManager } from '@/lib/notifications';
 import { useFormContext } from 'react-hook-form';
-import { extractFeesFromNotes, VisitFeeItem } from '@/lib/fee-utils';
+import { VisitFeeItem } from '@/lib/fee-utils';
 
 interface ServiceFee {
   id: string;
@@ -15,10 +15,13 @@ interface ServiceFee {
 
 interface SimplifiedVisitFeeFormProps {
   onFeesChange?: (fees: VisitFeeItem[], total: number) => void;
+  /** @deprecated Use initialFees instead — notes-based fee storage is removed */
   initialNotes?: string;
+  /** Pre-existing fees loaded from the VisitFee table (edit mode) */
+  initialFees?: VisitFeeItem[];
 }
 
-export function VisitFeeForm({ onFeesChange, initialNotes }: SimplifiedVisitFeeFormProps) {
+export function VisitFeeForm({ onFeesChange, initialNotes, initialFees }: SimplifiedVisitFeeFormProps) {
   const [fees, setFees] = useState<VisitFeeItem[]>([]);
   const [serviceFees, setServiceFees] = useState<ServiceFee[]>([]);
   const [selectedService, setSelectedService] = useState<string>('');
@@ -39,8 +42,18 @@ export function VisitFeeForm({ onFeesChange, initialNotes }: SimplifiedVisitFeeF
       console.error('Failed to load service fees:', error);
     }
 
-    // Load fees from initial notes if provided
-    if (initialNotes) {
+    // Load fees from initialFees prop (edit mode — data from VisitFee table)
+    if (initialFees && initialFees.length > 0) {
+      setFees(initialFees);
+      if (setValue) {
+        setValue('visitFees', initialFees);
+        setValue('totalFeeAmount', initialFees.reduce((s, f) => s + f.total, 0));
+      }
+    }
+    // Legacy fallback: if only initialNotes provided, try extracting old-format fees
+    // This path is kept only for visits saved before the migration.
+    else if (initialNotes) {
+      const { extractFeesFromNotes } = require('@/lib/fee-utils');
       const feesData = extractFeesFromNotes(initialNotes);
       if (feesData) {
         setFees(feesData.fees);
@@ -50,7 +63,7 @@ export function VisitFeeForm({ onFeesChange, initialNotes }: SimplifiedVisitFeeF
         }
       }
     }
-  }, [initialNotes, setValue]);
+  }, [initialNotes, initialFees, setValue]);
 
   // Update parent form whenever fees change
   const updateParentForm = useCallback((updatedFees: VisitFeeItem[]) => {

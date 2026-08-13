@@ -26,18 +26,35 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
   const [visitToDelete, setVisitToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [clinicProfile, setClinicProfile] = useState<any>(null);
+  const [visitPage, setVisitPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Map of visitId → ref for the hidden prescription DOM node
   const prescriptionRefs = React.useRef<Record<string, React.RefObject<HTMLDivElement>>>({});
 
-  useEffect(() => { fetchPatient(); }, [params.id]);
+  useEffect(() => { fetchPatient(1, true); }, [params.id]);
 
-  const fetchPatient = async () => {
+  const fetchPatient = async (page = 1, reset = false) => {
+    if (page === 1) setLoading(true);
+    else setIsLoadingMore(true);
     try {
-      const response = await fetch(`/api/patients/${params.id}`);
+      const response = await fetch(`/api/patients/${params.id}?visitPage=${page}&visitLimit=20`);
       if (!response.ok) { router.push('/patients'); return; }
-      setPatient(await response.json());
+      const data = await response.json();
+      if (reset || page === 1) {
+        setPatient(data);
+      } else {
+        // Append additional visits for "load more"
+        setPatient((prev: any) => prev ? {
+          ...data,
+          visits: [...(prev.visits || []), ...(data.visits || [])],
+        } : data);
+      }
+      setVisitPage(page);
     } catch { router.push('/patients'); }
-    finally { setLoading(false); }
+    finally {
+      setLoading(false);
+      setIsLoadingMore(false);
+    }
   };
 
   const handleDeleteVisit = (visitId: string) => {
@@ -53,7 +70,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
       if (res.ok) {
         setDeleteModalOpen(false);
         setVisitToDelete(null);
-        fetchPatient();
+        fetchPatient(1, true);
       } else { alert('Failed to delete visit'); }
     } catch { alert('Failed to delete visit'); }
     finally { setIsDeleting(false); }
@@ -66,7 +83,9 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
   );
   if (!patient) return null;
 
-  const totalVisits = patient.visits?.length ?? 0;
+  // Use pagination total when available so the stat card shows the real count
+  // even when only the first page of visits is loaded.
+  const totalVisits = patient.visitPagination?.total ?? patient.visits?.length ?? 0;
   const lastVisit = patient.visits?.[0];
 
   return (
@@ -195,7 +214,10 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
             <div className="space-y-5">
               {patient.visits.map((visit: any, index: number) => {
                 const reports = visit.reports ? JSON.parse(visit.reports as string) : [];
-                const visitNum = totalVisits - index;
+                // Use total from pagination if available; fall back to loaded-visits count.
+                // Visits are ordered newest-first, so visit #1 from the top is the newest.
+                const totalForNum = patient.visitPagination?.total ?? totalVisits;
+                const visitNum = totalForNum - index;
                 // Create a stable ref for each visit's prescription node
                 if (!prescriptionRefs.current[visit.id]) {
                   prescriptionRefs.current[visit.id] = React.createRef<HTMLDivElement>();
@@ -388,6 +410,29 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
                 );
               })}
             </div>
+
+            {/* Load more visits if pagination has more pages */}
+            {patient.visitPagination && visitPage < patient.visitPagination.pages && (
+              <div className="mt-6 text-center">
+                <p className="text-xs text-gray-400 mb-3">
+                  Showing {patient.visits?.length} of {patient.visitPagination.total} visits
+                </p>
+                <button
+                  onClick={() => fetchPatient(visitPage + 1)}
+                  disabled={isLoadingMore}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-brand-teal border-2 border-brand-teal rounded-lg hover:bg-brand-teal hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-brand-teal border-b-transparent" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>Load more visits</>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-16">

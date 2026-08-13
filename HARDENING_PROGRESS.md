@@ -288,3 +288,40 @@ git revert HEAD
 ---
 
 **Ready to deploy? Let me know and I'll guide you through the deployment steps!**
+
+---
+
+## Phase 3: Page Deep Review & Bug Fixes (2026-08-13)
+
+### ✅ Fix A: Eliminated `__FEES_JSON__` antipattern from VisitForm
+- **Files**: `components/VisitForm.tsx`, `components/VisitFeeForm.tsx`
+- **Problem**: `VisitForm.onSubmit` was still embedding fees as `__FEES_JSON__{...}__FEES_JSON__` inside the `notes` text field even though the API already supported the proper `visitFees` array → `VisitFee` table. Fees were being double-written.
+- **Fix**: Removed the fee-injection block. Now strips any legacy markers from notes before saving. `VisitFeeForm` loads fees from `initialFees` prop (from `visit.fees` DB array) instead of parsing notes text.
+
+### ✅ Fix B: Visit GET/PUT routes now include fees + strip legacy JSON
+- **File**: `app/api/patients/[id]/visits/[visitId]/route.ts`
+- **Problem**: GET didn't include `fees` in response so edit mode couldn't load them. PUT didn't update `VisitFee` records and preserved legacy `__FEES_JSON__` markers in notes.
+- **Fix**: GET now `include: { fees: true }`. PUT deletes+recreates `VisitFee` rows in the same transaction and strips `__FEES_JSON__` from notes on save.
+
+### ✅ Fix C: Patient detail page — visit pagination
+- **File**: `app/patients/[id]/page.tsx`
+- **Problem**: Page fetched visits without page params — silently showed only first 20 of any patient's visits with no indication more existed. Total visit count in the stats strip was wrong for paginated patients.
+- **Fix**: Added `visitPage` state with `fetchPatient(page, reset)`. "Load more visits" button appears when `visitPagination.pages > visitPage`. Total uses `visitPagination.total` from API.
+
+### ✅ Fix D: Payments page — removed broken bulk patient fetch
+- **File**: `app/payments/page.tsx`
+- **Problem**: Third `fetch('/api/patients?analytics=true&limit=1000')` pulled up to 1000 patient records on every page load. The `analytics=true` flag doesn't exist on that endpoint, and the response never includes `visits` arrays — so `allVisits` was always empty. Wasted a DB round-trip every load.
+- **Fix**: Removed the fetch entirely. `PatientVisitAnalytics` tab uses `/api/patients/analytics` directly.
+
+### ✅ Fix E: Server Component auth guards added
+- **Files**: `app/patients/[id]/visit/new/page.tsx`, `app/patients/[id]/edit/page.tsx`
+- **Problem**: Both Server Components called Prisma directly without verifying the session. Unauthenticated direct URL access bypassed the client-side `AuthProvider` guard entirely.
+- **Fix**: Added `cookies().get('auth-token')` + `verifyToken()` at the top, `redirect('/auth/login')` on failure.
+
+### ✅ Fix F: Remaining raw API route handlers migrated to `withMiddleware`
+- **Files migrated**: `auth/logout`, `medicines`, `clinic-profile`, `appointments`, `appointments/[id]`
+- **Gains**: Redis rate limiting, full security headers (CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy), structured error handling, CORS on all 5 routes.
+- **Still on raw handlers** (both have `requirePermission`, lower risk): `patients/[id]` PUT/DELETE, `export` GET.
+
+### Build Status
+- `npx tsc --noEmit` → **0 errors** across entire codebase ✅

@@ -7,19 +7,19 @@ Use this checklist to migrate all API routes to use the new security middleware.
 ### Authentication Routes
 - [ ] `app/api/auth/login/route.ts` ✅ DONE
 - [ ] `app/api/auth/register/route.ts` ✅ DONE
-- [ ] `app/api/auth/logout/route.ts`
-- [ ] `app/api/auth/me/route.ts`
+- [ ] `app/api/auth/logout/route.ts` ✅ DONE
+- [ ] `app/api/auth/me/route.ts` ✅ DONE
 
 ### Patient Routes
 - [ ] `app/api/patients/route.ts` ✅ DONE
-- [ ] `app/api/patients/[id]/route.ts`
+- [ ] `app/api/patients/[id]/route.ts` (uses requirePermission + raw handlers — medium priority)
 
 ### Appointment Routes
-- [ ] `app/api/appointments/route.ts`
-- [ ] `app/api/appointments/[id]/route.ts`
+- [ ] `app/api/appointments/route.ts` ✅ DONE
+- [ ] `app/api/appointments/[id]/route.ts` ✅ DONE
 
 ### Medicine Routes
-- [ ] `app/api/medicines/route.ts`
+- [ ] `app/api/medicines/route.ts` ✅ DONE
 
 ### Clinic Profile Routes
 - [ ] `app/api/clinic-profile/route.ts`
@@ -28,10 +28,10 @@ Use this checklist to migrate all API routes to use the new security middleware.
 - [ ] `app/api/upload-logo/route.ts`
 
 ### Health Routes
-- [ ] `app/api/health/route.ts`
+- [ ] `app/api/health/route.ts` ✅ DONE (no auth needed — intentionally public)
 
 ### Debug Routes
-- [ ] `app/api/debug-user/route.ts`
+- [ ] `app/api/debug-user/route.ts` ⚠️ REMOVE IN PRODUCTION
 
 ---
 
