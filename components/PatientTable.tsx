@@ -100,25 +100,31 @@ const PatientTable: React.FC<PatientTableProps> = ({ patients, totalPatients, cu
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       {/* ── Toolbar ── */}
-      <div className="px-4 sm:px-6 pt-5 pb-4 border-b border-gray-100">
-        <div className="flex flex-col gap-3">
+      <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-100">
+        <div className="flex flex-col gap-2.5">
+          {/* Row 1: Search */}
           <SearchInput placeholder="Search by name, phone, or patient ID..." />
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+
+          {/* Row 2: Actions — all in one compact row on mobile */}
+          <div className="flex items-center gap-2">
             <a
               href={buildExportUrl()}
               download
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-brand-teal bg-white border border-brand-teal/60 rounded-lg hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-brand-teal bg-white border border-brand-teal/50 rounded-lg hover:bg-brand-teal hover:text-white transition-all whitespace-nowrap"
             >
-              <Download className="h-4 w-4" />
-              Export Excel
+              <Download className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>Export</span>
             </a>
+
             <Link href="/patients/new">
-              <button className="w-full inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-medium text-white bg-brand-teal hover:bg-brand-teal/90 rounded-lg shadow-sm transition-all">
-                <UserPlus className="h-4 w-4" />
-                Add Patient
+              <button className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-brand-teal hover:bg-brand-teal/90 rounded-lg shadow-sm transition-all whitespace-nowrap">
+                <UserPlus className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>Add Patient</span>
               </button>
             </Link>
-            <div className="sm:ml-auto w-full sm:w-auto">
+
+            {/* Filter pill — pushes to right on desktop */}
+            <div className="ml-auto">
               <DateRangeFilter />
             </div>
           </div>
