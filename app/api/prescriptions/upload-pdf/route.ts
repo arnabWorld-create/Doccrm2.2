@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import { requirePermission } from '@/lib/rbac';
 import { logger } from '@/lib/logger';
 
@@ -28,7 +29,14 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const pdfFile = formData.get('pdf') as File | null;
-    const filename = (formData.get('filename') as string | null) || `prescription_${Date.now()}.pdf`;
+    // Always generate a UUID-based filename server-side — never trust the
+    // client-supplied filename for the storage path. UUID = 128 bits of
+    // entropy, not guessable even if an attacker knows the patient ID.
+    const clientFilename = (formData.get('filename') as string | null) || '';
+    const safeBasename = clientFilename.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.pdf$/i, '');
+    const filename = safeBasename
+      ? `${safeBasename}_${randomUUID()}.pdf`
+      : `prescription_${randomUUID()}.pdf`;
 
     if (!pdfFile || pdfFile.type !== 'application/pdf') {
       return Response.json({ error: 'A valid PDF file is required' }, { status: 400 });

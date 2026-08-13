@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { validateFileOrThrow, FILE_UPLOAD_CONFIGS, generateSafeFilename } from '@/lib/file-upload-validator';
 import { withMiddleware, successResponse } from '@/lib/middleware';
 import { ApiErrors } from '@/lib/api-error';
+import { requirePermission } from '@/lib/rbac';
 import { RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,10 @@ function getSupabaseAdminClient() {
 
 export const POST = withMiddleware(
   async (request: NextRequest) => {
+    // Auth check — must be logged-in staff/admin/doctor with patient write permission
+    const { error: authError } = await requirePermission(request, 'patients', 'write');
+    if (authError) throw authError;
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 

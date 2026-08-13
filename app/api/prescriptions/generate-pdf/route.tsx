@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import prisma from '@/lib/prisma';
 import { requirePermission } from '@/lib/rbac';
 import { logger } from '@/lib/logger';
@@ -340,8 +341,10 @@ export async function POST(request: NextRequest) {
 
     // ── Upload to Supabase ─────────────────────────────────────────────────
     const supabase = getSupabaseAdmin();
+    // Filename uses a random UUID — 128 bits of entropy, not guessable even
+    // knowing the patient ID or date. Safe to share publicly via WhatsApp.
     const safeDate = new Date(visit.visitDate).toISOString().split('T')[0];
-    const filename = `prescriptions/prescription_${patient.patientId}_${safeDate}_${Date.now()}.pdf`;
+    const filename = `prescriptions/prescription_${patient.patientId}_${safeDate}_${randomUUID()}.pdf`;
 
     if (supabase) {
       const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || 'patient-reports';

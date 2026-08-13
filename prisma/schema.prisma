@@ -282,3 +282,49 @@ model AnalyticsCache {
   @@index([expiresAt])
   @@map("analytics_cache")
 }
+
+/// Per-patient analytics cache — one row per patient.
+/// Replaces the single giant JSON blob in AnalyticsCache for patient analytics.
+/// The cron job upserts rows here; the API reads paginated rows directly.
+model PatientAnalyticsCache {
+  id                  String   @id @default(cuid())
+  patientId           String   @unique   // FK-like — matches Patient.id
+  patientDisplayId    String             // e.g. "FC-001"
+  name                String
+  contact             String?
+  totalVisits         Int      @default(0)
+  totalFeesGenerated  Float    @default(0)
+  averageFeePerVisit  Float    @default(0)
+  firstVisitDate      DateTime?
+  lastVisitDate       DateTime?
+  visitFrequency      String   @default("Low")  // "High" | "Medium" | "Low"
+  paymentMethods      String   @default("{}")   // JSON object
+  monthlyVisits       String   @default("[]")   // JSON array (last 12 months)
+  recentVisits        String   @default("[]")   // JSON array (last 5 visits)
+  calculatedAt        DateTime @default(now())
+
+  @@index([totalFeesGenerated])
+  @@index([totalVisits])
+  @@index([lastVisitDate])
+  @@index([name])
+  @@index([calculatedAt])
+  @@map("patient_analytics_cache")
+}
+
+/// Summary row for the analytics cache — one singleton row.
+model AnalyticsSummaryCache {
+  id                      String   @id @default(cuid())
+  cacheKey                String   @unique @default("summary")
+  totalPatients           Int      @default(0)
+  totalVisitsAll          Int      @default(0)
+  totalRevenueAll         Float    @default(0)
+  averageVisitsPerPatient Float    @default(0)
+  averageRevenuePerPatient Float   @default(0)
+  frequencyHigh           Int      @default(0)
+  frequencyMedium         Int      @default(0)
+  frequencyLow            Int      @default(0)
+  calculatedAt            DateTime @default(now())
+  expiresAt               DateTime
+
+  @@map("analytics_summary_cache")
+}

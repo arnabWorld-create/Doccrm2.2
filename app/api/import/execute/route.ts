@@ -3,6 +3,7 @@ import { ImportService } from '@/lib/import-service';
 import { requirePermission } from '@/lib/rbac';
 import { logger } from '@/lib/logger';
 import prisma from '@/lib/prisma';
+import { calculatePatientAnalytics } from '@/lib/analytics-calculator';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for imports
@@ -226,7 +227,17 @@ export async function POST(request: NextRequest) {
           
           const finalMessage = `data: ${JSON.stringify({ result })}\n\n`;
           controller.enqueue(encoder.encode(finalMessage));
-          
+
+          // Rebuild analytics cache after import so the analytics page
+          // reflects the newly imported patients immediately.
+          // Runs after the stream is flushed — user already sees "done".
+          // Fire-and-forget: a failure here must never fail the import.
+          if (patientsCreated > 0 || visitsCreated > 0) {
+            calculatePatientAnalytics()
+              .then((r) => logger.info('Post-import analytics rebuild complete', r))
+              .catch((e) => logger.error('Post-import analytics rebuild failed', e));
+          }
+
           controller.close();
         } catch (err) {
           // FIX #3: Log full error server-side, send only a safe message in the stream

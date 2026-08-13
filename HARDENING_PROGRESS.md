@@ -83,7 +83,7 @@
 1. **Deploy Database Indexes**
    ```bash
    # Connect to production database
-   psql "postgresql://postgres:Puchu889956@db.sxrolbjqenouqppjycmo.supabase.co:5432/postgres"
+   psql "postgresql://postgres:[REDACTED]@db.sxrolbjqenouqppjycmo.supabase.co:5432/postgres"
    
    # Run the migration
    \i prisma/migrations/add_critical_indexes.sql
