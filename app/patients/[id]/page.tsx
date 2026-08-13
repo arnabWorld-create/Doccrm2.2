@@ -97,10 +97,10 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
         <div className="h-1.5 bg-gradient-to-r from-brand-teal via-brand-teal/70 to-brand-teal/30" />
 
         <div className="p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
 
             {/* Avatar + Info */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
               <div className="w-14 h-14 rounded-xl bg-brand-teal flex items-center justify-center flex-shrink-0 shadow-sm">
                 <User className="w-7 h-7 text-white" />
               </div>
@@ -156,16 +156,18 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+            {/* Action buttons — top-right, icon-only on mobile */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <Link href="/patients">
-                <button className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-                  <ArrowLeft className="h-4 w-4" />Back
+                <button className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all" title="Back to patients">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Back</span>
                 </button>
               </Link>
               <Link href={`/patients/${patient.id}/visit/new`}>
-                <button className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-brand-teal hover:bg-brand-teal/90 rounded-lg shadow-sm transition-all">
-                  <Plus className="h-4 w-4" />Add Visit
+                <button className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-sm font-medium text-white bg-brand-teal hover:bg-brand-teal/90 rounded-lg shadow-sm transition-all" title="Add new visit">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Add Visit</span>
                 </button>
               </Link>
             </div>
